@@ -29,3 +29,6 @@ Thumbs.db
 
 # temporary files
 *.local
+
+frontend/node_modules/
+backend/node_modules/
