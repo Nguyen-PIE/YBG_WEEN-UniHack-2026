@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router';
 import { ShoppingCart, Tag, ListChecks } from 'lucide-react';
 
 export function Layout() {
