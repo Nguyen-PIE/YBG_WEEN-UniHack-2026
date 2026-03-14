@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { products, ProductWithPrices } from '../data/mockData';
+import { ProductWithPrices } from '../data/mockData';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
-import { DollarSign, Users, Utensils, Sparkles } from 'lucide-react';
+import { DollarSign, Users, Utensils, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BudgetPlannerProps {
@@ -15,86 +15,54 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
   const [budget, setBudget] = useState('');
   const [people, setPeople] = useState('');
   const [meals, setMeals] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const generateGroceryList = () => {
+  const generateGroceryList = async () => {
     const budgetNum = parseFloat(budget);
     const peopleNum = parseInt(people);
     const mealsNum = parseInt(meals);
 
-    if (!budgetNum || budgetNum <= 0) {
-      toast.error('Please enter a valid budget');
-      return;
-    }
+    // Validation
+    if (!budgetNum || budgetNum <= 0) return toast.error('Please enter a valid budget');
+    if (!peopleNum || peopleNum <= 0) return toast.error('How many people are we feeding?');
+    if (!mealsNum || mealsNum <= 0) return toast.error('How many meals do you need?');
 
-    if (!peopleNum || peopleNum <= 0) {
-      toast.error('Please enter number of people');
-      return;
-    }
+    setIsLoading(true);
+    const loadingToast = toast.loading("Bunny is crunching the numbers...");
 
-    if (!mealsNum || mealsNum <= 0) {
-      toast.error('Please enter number of meals');
-      return;
-    }
-
-    const essentialCategories = ['Grains', 'Proteins', 'Vegetables'];
-    const budgetPerCategory = budgetNum / 3;
-
-    const selectedProducts: ProductWithPrices[] = [];
-    let totalCost = 0;
-    let totalCalories = 0;
-
-    essentialCategories.forEach((category) => {
-      const categoryProducts = products.filter((p) => p.category === category);
-      let categorySpent = 0;
-
-      categoryProducts.forEach((product) => {
-        const cheapestPrice = Math.min(
-          ...product.prices.map((p) => p.salePrice || p.price)
-        );
-
-        if (
-          categorySpent + cheapestPrice <= budgetPerCategory &&
-          totalCost + cheapestPrice <= budgetNum
-        ) {
-          selectedProducts.push(product);
-          totalCost += cheapestPrice;
-          categorySpent += cheapestPrice;
-          totalCalories += product.calories || 0;
-        }
+    try {
+      const response = await fetch("http://localhost:8000/generate-recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          budget: budgetNum,
+          servings: peopleNum,
+          target_calories: 2000 /
+        }),
       });
-    });
 
-    const remainingProducts = products.filter(
-      (p) => !selectedProducts.includes(p)
-    );
-    
-    remainingProducts.forEach((product) => {
-      const cheapestPrice = Math.min(
-        ...product.prices.map((p) => p.salePrice || p.price)
-      );
+      if (!response.ok) throw new Error("Backend failed to generate list");
+
+      const data = await response.json();
       
-      if (totalCost + cheapestPrice <= budgetNum) {
-        selectedProducts.push(product);
-        totalCost += cheapestPrice;
-        totalCalories += product.calories || 0;
-      }
-    });
-
-    if (selectedProducts.length === 0) {
-      toast.error('Budget too low to generate a meaningful list');
-      return;
+      // Assuming your Python script returns an object with an 'items' array
+      onGenerateList(data.items);
+      
+      toast.success(`Generated list via Python Backend!`, { id: loadingToast });
+    } catch (error) {
+      console.error(error);
+      toast.error("The bunny tripped! Make sure your Python server is running.", { id: loadingToast });
+    } finally {
+      setIsLoading(false);
     }
-
-    toast.success(
-      `Generated list with ${selectedProducts.length} items (~$${totalCost.toFixed(2)})`
-    );
-    onGenerateList(selectedProducts);
   };
 
   return (
     <Card className="p-8 bg-white border-2 border-slate-200 rounded-3xl shadow-sm">
       <div className="mb-6">
-        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2 font-display">
           <Sparkles className="size-6 text-pink-500 fill-pink-500" />
           Budget Magic
         </h2>
@@ -103,7 +71,6 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
         </p>
       </div>
 
-      {/* Symmetrical 3-column grid for desktop, stacked for mobile */}
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="budget" className="flex items-center gap-2 font-bold text-slate-700">
@@ -116,6 +83,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
             placeholder="0.00"
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
+            disabled={isLoading}
             className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
           />
         </div>
@@ -131,6 +99,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
             placeholder="1"
             value={people}
             onChange={(e) => setPeople(e.target.value)}
+            disabled={isLoading}
             className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
           />
         </div>
@@ -146,6 +115,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
             placeholder="1"
             value={meals}
             onChange={(e) => setMeals(e.target.value)}
+            disabled={isLoading}
             className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
           />
         </div>
@@ -153,9 +123,13 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
 
       <Button 
         onClick={generateGroceryList} 
+        disabled={isLoading}
         className="w-full mt-8 h-14 text-lg font-bold bg-pink-600 hover:bg-pink-700 text-white rounded-2xl shadow-md transition-all active:scale-[0.98]"
       >
-        Generate My Grocery List
+        {isLoading ? (
+          <Loader2 className="size-5 animate-spin mr-2" />
+        ) : null}
+        {isLoading ? "Crunching Numbers..." : "Generate My Grocery List"}
       </Button>
     </Card>
   );

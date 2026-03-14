@@ -1,7 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router';
 import { ShoppingCart, Tag, ListChecks } from 'lucide-react';
-export const BUNNY_LOGO = "https://storage.googleapis.com/unihack-assets-pierre/logo.png";
-
+export const BUNNY_LOGO = "https://storage.googleapis.com/budget-bunny-assets/bunny.png";
 
 export function Layout() {
   const location = useLocation();
