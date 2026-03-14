@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 
-from recipe import generate_budget_recipe 
+from app.core.recipe import generate_budget_recipe
 
 app = FastAPI(title="UniHack 2026 API")
 
