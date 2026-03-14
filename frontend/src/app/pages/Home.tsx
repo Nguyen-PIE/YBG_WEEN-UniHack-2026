@@ -118,30 +118,6 @@ export function Home() {
           </div>
         </Card>
       )}
-
-      {/* Info Cards */}
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Card className="p-6 border-none bg-emerald-100 rounded-3xl shadow-md hover:shadow-lg transition-shadow">
-          <h3 className="font-bold text-green-900 mb-2 text-lg">Community Love</h3>
-          <p className="text-sm text-green-800">
-            Find local food pantries with free or cheap essentials when you need 'em most!
-          </p>
-        </Card>
-        
-        <Card className="p-6 border-none bg-blue-100 rounded-3xl shadow-md hover:shadow-lg transition-shadow">
-          <h3 className="font-bold text-blue-900 mb-2 text-lg">Real Prices</h3>
-          <p className="text-sm text-blue-800">
-            We check prices at all the big stores so you don't have to!
-          </p>
-        </Card>
-        
-        <Card className="p-6 border-none bg-pink-100 rounded-3xl shadow-md hover:shadow-lg transition-shadow">
-          <h3 className="font-bold text-purple-900 mb-2 text-lg">Smart Bunny</h3>
-          <p className="text-sm text-purple-800">
-            Get lists that match your budget AND keep you fed with good nutrition!
-          </p>
-        </Card>
-      </div>
     </div>
   );
 }

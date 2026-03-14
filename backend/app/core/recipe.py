@@ -118,9 +118,11 @@ def generate_budget_recipe(budget, servings, target_calories):
             print(f" {i}. {step}")
             
         print(f"{'='*50}\n")
+        return recipe
 
     except Exception as e:
         print(f"OpenAI Error: {e}")
+        return None
 
 # ==========================================
 # 5. RUN THE SCRIPT

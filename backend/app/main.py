@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 
-from recipe import generate_budget_recipe 
+from app.core.recipe import generate_budget_recipe
 
 app = FastAPI(title="UniHack 2026 API")
 
@@ -42,6 +42,13 @@ async def create_recipe(request: RecipeRequest):
         return recipe
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/search-prices")
+async def search_prices(data: dict):
+    items = data.get("items", [])
+    # Call your script.py logic here
+    # result = script.run_elastic_comparison(items)
+    return {"optimized_items": []} # Return the data
 
 # 4. RUN (For local testing)
 if __name__ == "__main__":
