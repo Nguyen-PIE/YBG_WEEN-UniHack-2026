@@ -17,7 +17,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
   const [meals, setMeals] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const generateGroceryList = async () => {
+const generateGroceryList = async () => {
     const budgetNum = parseFloat(budget);
     const peopleNum = parseInt(people);
     const mealsNum = parseInt(meals);
@@ -31,7 +31,9 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
     const loadingToast = toast.loading("Bunny is crunching the numbers...");
 
     try {
-      const response = await fetch("http://localhost:8000/generate-recipe", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+      const response = await fetch(`${API_URL}/generate-recipe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +41,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
         body: JSON.stringify({
           budget: budgetNum,
           servings: peopleNum,
-          target_calories: 2000 /
+          target_calories: Math.round(2000 / mealsNum) 
         })
       });
 
@@ -47,8 +49,8 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
 
       const data = await response.json();
       
-      // Assuming your Python script returns an object with an 'items' array
-      onGenerateList(data.items);
+      // Map to the correct key returned by your Python OpenAI prompt
+      onGenerateList(data.ingredientsToBuy);
       
       toast.success(`Generated list via Python Backend!`, { id: loadingToast });
     } catch (error) {
