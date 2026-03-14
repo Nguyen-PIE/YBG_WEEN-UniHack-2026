@@ -44,11 +44,6 @@ export function WeeklySpecials() {
     <div className="space-y-8">
       {/* Header - Solid High-Contrast Style */}
       <Card className="bg-orange-500 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-md">
-        <img 
-          src="assets/bunny.png"
-          alt="Budget Bunny"
-          className="absolute right-4 -bottom-4 size-40 opacity-20 -rotate-12"
-        />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <Sparkles className="size-10 fill-white" />

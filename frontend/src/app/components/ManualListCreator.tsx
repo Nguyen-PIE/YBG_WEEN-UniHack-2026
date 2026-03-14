@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Plus, X, ShoppingBasket, Sparkles } from 'lucide-react';
+import { Plus, X, ShoppingBasket, Sparkles, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ManualListCreatorProps {
@@ -36,7 +36,6 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
     if (!selectedItems.find(item => item.id === product.id)) {
       setSelectedItems([...selectedItems, product]);
       toast.success(`Added ${product.name}! 🎉`);
-      // Keep the search box active and clear it, so users can add multiple items quickly
       setCurrentItem('');
       setSearchResults([]);
     } else {
@@ -54,7 +53,6 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
       toast.error('Add some items first! 🛒');
       return;
     }
-
     toast.success(`Found the cheapest prices for ${selectedItems.length} items! 🐰✨`);
     onCreateList(selectedItems);
   };
@@ -65,30 +63,35 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
   }, 0);
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-dashed border-orange-300 rounded-3xl">
-      <div className="flex items-center gap-2 mb-4">
-        <ShoppingBasket className="size-6 text-orange-600" />
-        <h2 className="text-2xl font-bold text-gray-800">Create Your List</h2>
-        <Sparkles className="size-5 text-yellow-500" />
+    <Card className="p-8 bg-white border-2 border-slate-200 rounded-3xl shadow-sm">
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <ShoppingBasket className="size-6 text-orange-500 fill-orange-500" />
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Create Your List</h2>
+        </div>
+        <p className="text-slate-500 font-medium">
+          Add items manually and we'll compare area prices for you.
+        </p>
       </div>
-      <p className="text-gray-700 mb-6">
-        Type what you need and keep adding items! We'll hop around to find the best prices! 🥕
-      </p>
 
-      {/* Search Input */}
-      <div className="relative mb-6">
+      {/* Search Input Area */}
+      <div className="relative mb-8">
+        <div className="flex items-center gap-2 mb-2">
+            <Search className="size-3 text-slate-400" />
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Find Item</span>
+        </div>
         <Input
           type="text"
-          placeholder="Type an item... (e.g., milk, bread, eggs)"
+          placeholder="e.g., Milk, Bread, Avocado..."
           value={currentItem}
           onChange={(e) => handleSearch(e.target.value)}
-          className="text-lg py-6 border-2 border-orange-300 focus:border-pink-400 rounded-2xl"
+          className="h-14 text-lg border-2 border-slate-100 bg-slate-50 rounded-2xl focus:border-orange-500 focus:ring-0 transition-colors"
           autoFocus
         />
         
-        {/* Search Results Dropdown */}
+        {/* Search Results Dropdown - Flat Style */}
         {searchResults.length > 0 && (
-          <div className="absolute z-10 w-full mt-2 bg-white rounded-2xl shadow-xl border-2 border-orange-200 overflow-hidden max-h-96 overflow-y-auto">
+          <div className="absolute z-20 w-full mt-2 bg-white rounded-2xl shadow-xl border-2 border-slate-200 overflow-hidden max-h-96 overflow-y-auto">
             {searchResults.map((product) => {
               const cheapestPrice = Math.min(...product.prices.map(p => p.salePrice || p.price));
               const cheapestStore = product.prices.find(p => (p.salePrice || p.price) === cheapestPrice);
@@ -99,23 +102,29 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
                   key={product.id}
                   onClick={() => addItem(product)}
                   disabled={!!alreadyAdded}
-                  className={`w-full p-4 text-left flex items-center justify-between border-b border-orange-100 last:border-0 transition-colors ${
+                  className={`w-full p-4 text-left flex items-center justify-between border-b border-slate-100 last:border-0 transition-colors ${
                     alreadyAdded 
-                      ? 'bg-gray-100 opacity-50 cursor-not-allowed' 
-                      : 'hover:bg-pink-50'
+                      ? 'bg-slate-50 opacity-50 cursor-not-allowed' 
+                      : 'hover:bg-orange-50'
                   }`}
                 >
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-800">{product.name}</p>
-                    <p className="text-sm text-gray-600">{product.unit}</p>
+                    <p className="font-bold text-slate-800">{product.name}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase">{product.unit}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-green-600">${cheapestPrice.toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">{cheapestStore?.storeName}</p>
+                  <div className="text-right flex items-center gap-4">
+                    <div>
+                        <p className="font-black text-emerald-600">${cheapestPrice.toFixed(2)}</p>
+                        <p className="text-[10px] font-bold text-slate-400">{cheapestStore?.storeName}</p>
+                    </div>
+                    {alreadyAdded ? (
+                         <Badge className="bg-emerald-100 text-emerald-700 border-none rounded-lg px-2 py-0.5">✓</Badge>
+                    ) : (
+                        <div className="bg-orange-100 p-1 rounded-lg">
+                            <Plus className="size-4 text-orange-600" />
+                        </div>
+                    )}
                   </div>
-                  {alreadyAdded && (
-                    <Badge className="ml-2 bg-green-500 text-white border-none">✓ Added</Badge>
-                  )}
                 </button>
               );
             })}
@@ -123,56 +132,64 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
         )}
       </div>
 
-      {/* Selected Items */}
+      {/* Selected Items - Flat List */}
       {selectedItems.length > 0 && (
-        <div className="mb-6 space-y-3">
-          <h3 className="font-semibold text-gray-700 flex items-center gap-2">
-            Your Items ({selectedItems.length})
-          </h3>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="mb-8 space-y-4">
+          <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                Shopping Bag ({selectedItems.length})
+              </h3>
+              <button 
+                onClick={() => setSelectedItems([])}
+                className="text-[10px] font-black text-red-500 uppercase hover:underline"
+              >
+                Clear All
+              </button>
+          </div>
+          
+          <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
             {selectedItems.map((product) => {
               const cheapestPrice = Math.min(...product.prices.map(p => p.salePrice || p.price));
               
               return (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between p-3 bg-white rounded-xl border-2 border-orange-200 shadow-sm"
+                  className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-gray-800">{product.name}</p>
-                    <p className="text-sm text-gray-600">{product.unit}</p>
+                    <p className="font-bold text-slate-800">{product.name}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase">{product.unit}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-green-600">${cheapestPrice.toFixed(2)}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                  <div className="flex items-center gap-4">
+                    <span className="font-black text-emerald-600">${cheapestPrice.toFixed(2)}</span>
+                    <button
                       onClick={() => removeItem(product.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                      className="text-slate-300 hover:text-red-500 transition-colors"
                     >
-                      <X className="size-4" />
-                    </Button>
+                      <X className="size-5" />
+                    </button>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Total */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl border-2 border-purple-300">
-            <span className="text-lg font-bold text-gray-800">Estimated Total:</span>
-            <span className="text-2xl font-bold text-purple-700">${totalCost.toFixed(2)}</span>
+          {/* Total Bar - Solid Bento Box */}
+          <div className="flex items-center justify-between p-5 bg-slate-800 rounded-2xl shadow-inner">
+            <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Estimated Total</span>
+            <span className="text-2xl font-black text-white">${totalCost.toFixed(2)}</span>
           </div>
         </div>
       )}
 
-      {/* Find Cheapest Button */}
+      {/* Final Action Button */}
       <Button
         onClick={findCheapest}
-        className="w-full py-6 text-lg bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+        disabled={selectedItems.length === 0}
+        className="w-full h-16 text-lg font-black bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
       >
-        <Sparkles className="size-5 mr-2" />
-        Find Cheapest Prices!
+        <Sparkles className="size-5 fill-white" />
+        Find Cheapest Store
       </Button>
     </Card>
   );
