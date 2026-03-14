@@ -40,7 +40,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
           budget: budgetNum,
           servings: peopleNum,
           target_calories: 2000 /
-        }),
+        })
       });
 
       if (!response.ok) throw new Error("Backend failed to generate list");

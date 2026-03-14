@@ -42,6 +42,13 @@ async def create_recipe(request: RecipeRequest):
         return recipe
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/search-prices")
+async def search_prices(data: dict):
+    items = data.get("items", [])
+    # Call your script.py logic here
+    # result = script.run_elastic_comparison(items)
+    return {"optimized_items": []} # Return the data
 
 # 4. RUN (For local testing)
 if __name__ == "__main__":

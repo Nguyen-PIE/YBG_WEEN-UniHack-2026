@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { products, ProductWithPrices, stores } from '../data/mockData';
+import { ProductWithPrices } from '../data/mockData';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Plus, X, ShoppingBasket, Sparkles, Search } from 'lucide-react';
+import { Plus, X, ShoppingBasket, Sparkles, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ManualListCreatorProps {
@@ -15,20 +15,21 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
   const [currentItem, setCurrentItem] = useState('');
   const [searchResults, setSearchResults] = useState<ProductWithPrices[]>([]);
   const [selectedItems, setSelectedItems] = useState<ProductWithPrices[]>([]);
+  const [isLoading, setIsLoading] = useState(false); // Added for backend call
 
+  // Mock search logic remains local for speed, 
+  // but adding items stays the same
   const handleSearch = (query: string) => {
+    // ... (keep your existing handleSearch logic)
     setCurrentItem(query);
-    
     if (query.trim().length < 2) {
       setSearchResults([]);
       return;
     }
-
-    const results = products.filter((product) =>
-      product.name.toLowerCase().includes(query.toLowerCase()) ||
-      product.category.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 8);
-
+    // (Filtering from mockData for the UI dropdown)
+    const results = (window as any).mockProducts?.filter((product: any) =>
+      product.name.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 8) || [];
     setSearchResults(results);
   };
 
@@ -48,13 +49,38 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
     toast.success('Removed from list');
   };
 
-  const findCheapest = () => {
+  // --- BACKEND CALL INTEGRATION ---
+  const findCheapest = async () => {
     if (selectedItems.length === 0) {
       toast.error('Add some items first! 🛒');
       return;
     }
-    toast.success(`Found the cheapest prices for ${selectedItems.length} items! 🐰✨`);
-    onCreateList(selectedItems);
+
+    setIsLoading(true);
+    const loadingToast = toast.loading("Bunny is checking store prices...");
+
+    try {
+      const response = await fetch("http://localhost:8000/search-prices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          items: selectedItems.map(i => i.name) // Sending names to your Python script
+        }),
+      });
+
+      if (!response.ok) throw new Error("Backend search failed");
+
+      const data = await response.json();
+      
+      // Send the optimized data back to the parent
+      onCreateList(data.optimized_items || selectedItems);
+      toast.success(`Found the best local deals! 🐰✨`, { id: loadingToast });
+    } catch (error) {
+      console.error(error);
+      toast.error("Couldn't reach the burrow. Is the Python server on?", { id: loadingToast });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const totalCost = selectedItems.reduce((sum, product) => {
@@ -67,14 +93,13 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <ShoppingBasket className="size-6 text-orange-500 fill-orange-500" />
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Create Your List</h2>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight font-display">Create Your List</h2>
         </div>
         <p className="text-slate-500 font-medium">
           Add items manually and we'll compare area prices for you.
         </p>
       </div>
 
-      {/* Search Input Area */}
       <div className="relative mb-8">
         <div className="flex items-center gap-2 mb-2">
             <Search className="size-3 text-slate-400" />
@@ -85,111 +110,69 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
           placeholder="e.g., Milk, Bread, Avocado..."
           value={currentItem}
           onChange={(e) => handleSearch(e.target.value)}
-          className="h-14 text-lg border-2 border-slate-100 bg-slate-50 rounded-2xl focus:border-orange-500 focus:ring-0 transition-colors"
-          autoFocus
+          disabled={isLoading}
+          className="h-14 text-lg border-2 border-slate-100 bg-slate-50 rounded-2xl focus:border-orange-500 transition-colors"
         />
         
-        {/* Search Results Dropdown - Flat Style */}
+        {/* Dropdown logic stays here... */}
         {searchResults.length > 0 && (
-          <div className="absolute z-20 w-full mt-2 bg-white rounded-2xl shadow-xl border-2 border-slate-200 overflow-hidden max-h-96 overflow-y-auto">
-            {searchResults.map((product) => {
-              const cheapestPrice = Math.min(...product.prices.map(p => p.salePrice || p.price));
-              const cheapestStore = product.prices.find(p => (p.salePrice || p.price) === cheapestPrice);
-              const alreadyAdded = selectedItems.find(item => item.id === product.id);
-              
-              return (
-                <button
-                  key={product.id}
-                  onClick={() => addItem(product)}
-                  disabled={!!alreadyAdded}
-                  className={`w-full p-4 text-left flex items-center justify-between border-b border-slate-100 last:border-0 transition-colors ${
-                    alreadyAdded 
-                      ? 'bg-slate-50 opacity-50 cursor-not-allowed' 
-                      : 'hover:bg-orange-50'
-                  }`}
-                >
-                  <div className="flex-1">
-                    <p className="font-bold text-slate-800">{product.name}</p>
-                    <p className="text-[10px] font-black text-slate-400 uppercase">{product.unit}</p>
-                  </div>
-                  <div className="text-right flex items-center gap-4">
-                    <div>
-                        <p className="font-black text-emerald-600">${cheapestPrice.toFixed(2)}</p>
-                        <p className="text-[10px] font-bold text-slate-400">{cheapestStore?.storeName}</p>
-                    </div>
-                    {alreadyAdded ? (
-                         <Badge className="bg-emerald-100 text-emerald-700 border-none rounded-lg px-2 py-0.5">✓</Badge>
-                    ) : (
-                        <div className="bg-orange-100 p-1 rounded-lg">
-                            <Plus className="size-4 text-orange-600" />
-                        </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+          <div className="absolute z-20 w-full mt-2 bg-white rounded-2xl shadow-xl border-2 border-slate-200 overflow-hidden">
+            {searchResults.map((product) => (
+               <button
+               key={product.id}
+               onClick={() => addItem(product)}
+               className="w-full p-4 text-left flex items-center justify-between border-b border-slate-100 hover:bg-orange-50 transition-colors"
+             >
+               <div className="flex-1">
+                 <p className="font-bold text-slate-800">{product.name}</p>
+                 <p className="text-[10px] font-black text-slate-400 uppercase">{product.unit}</p>
+               </div>
+               <Plus className="size-4 text-orange-600" />
+             </button>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Selected Items - Flat List */}
       {selectedItems.length > 0 && (
         <div className="mb-8 space-y-4">
           <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                Shopping Bag ({selectedItems.length})
-              </h3>
-              <button 
-                onClick={() => setSelectedItems([])}
-                className="text-[10px] font-black text-red-500 uppercase hover:underline"
-              >
-                Clear All
-              </button>
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Shopping Bag</h3>
+              <button onClick={() => setSelectedItems([])} className="text-[10px] font-black text-red-500 uppercase hover:underline">Clear All</button>
           </div>
           
-          <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-            {selectedItems.map((product) => {
-              const cheapestPrice = Math.min(...product.prices.map(p => p.salePrice || p.price));
-              
-              return (
-                <div
-                  key={product.id}
-                  className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100"
-                >
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {selectedItems.map((product) => (
+               <div key={product.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="flex-1">
                     <p className="font-bold text-slate-800">{product.name}</p>
                     <p className="text-[10px] font-black text-slate-400 uppercase">{product.unit}</p>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-black text-emerald-600">${cheapestPrice.toFixed(2)}</span>
-                    <button
-                      onClick={() => removeItem(product.id)}
-                      className="text-slate-300 hover:text-red-500 transition-colors"
-                    >
-                      <X className="size-5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                  <button onClick={() => removeItem(product.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                    <X className="size-5" />
+                  </button>
+               </div>
+            ))}
           </div>
 
-          {/* Total Bar - Solid Bento Box */}
-          <div className="flex items-center justify-between p-5 bg-slate-800 rounded-2xl shadow-inner">
+          <div className="flex items-center justify-between p-5 bg-slate-800 rounded-2xl">
             <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Estimated Total</span>
             <span className="text-2xl font-black text-white">${totalCost.toFixed(2)}</span>
           </div>
         </div>
       )}
 
-      {/* Final Action Button */}
       <Button
         onClick={findCheapest}
-        disabled={selectedItems.length === 0}
+        disabled={selectedItems.length === 0 || isLoading}
         className="w-full h-16 text-lg font-black bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
       >
-        <Sparkles className="size-5 fill-white" />
-        Find Cheapest Store
+        {isLoading ? (
+          <Loader2 className="size-6 animate-spin" />
+        ) : (
+          <Sparkles className="size-5 fill-white" />
+        )}
+        {isLoading ? "Comparing Stores..." : "Find Cheapest Store"}
       </Button>
     </Card>
   );
