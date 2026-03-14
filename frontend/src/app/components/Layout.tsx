@@ -1,6 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router';
 import { ShoppingCart, Tag, ListChecks } from 'lucide-react';
-import bunnyIcon from 'figma:asset/3fe3d535f340869e5c4ecbe83e7dd1670ca78e35.png';
 
 export function Layout() {
   const location = useLocation();
@@ -18,13 +17,13 @@ export function Layout() {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <img 
-                src={bunnyIcon}
+                src={"assets/bunny.png"}
                 alt="Budget Bunny Mascot"
                 className="size-16"
               />
               <div>
-                <h1 className="text-3xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Budget Bunny</h1>
-                <p className="text-sm text-gray-600 font-medium">Hop to savings! 🥕</p>
+                <h1 className="text-3xl font-black  from-pink-600 to-purple-600 bg-clip-text text-transparent">Budget Bunny</h1>
+                <p className="text-sm text-gray-600 font-medium">Hop to savings!</p>
               </div>
             </Link>
             

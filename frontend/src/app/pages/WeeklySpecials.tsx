@@ -4,7 +4,6 @@ import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Tag, TrendingDown, Store } from 'lucide-react';
-import bunnyIcon from 'figma:asset/3fe3d535f340869e5c4ecbe83e7dd1670ca78e35.png';
 
 export function WeeklySpecials() {
   const [selectedStore, setSelectedStore] = useState<string>('all');
@@ -51,7 +50,7 @@ export function WeeklySpecials() {
       {/* Header */}
       <Card className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-2xl">
         <img 
-          src={bunnyIcon}
+          // src={bunnyIcon}
           alt="Budget Bunny"
           className="absolute right-4 top-4 size-36 opacity-40"
         />
