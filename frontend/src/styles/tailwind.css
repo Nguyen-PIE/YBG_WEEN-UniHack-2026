@@ -1,4 +1,9 @@
-@import 'tailwindcss' source(none);
-@source '../**/*.{js,ts,jsx,tsx}';
+/* src/styles/tailwind.css */
+@import "tailwindcss";
 
-@import 'tw-animate-css';
+@theme {
+  --font-display: "Orbit Village", sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui;
+  
+  --color-bunny-pink: #db2777; 
+}
