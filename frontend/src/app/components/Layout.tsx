@@ -27,7 +27,7 @@ export function Layout() {
                   Budget Bunny
                 </h1>
                 <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">
-                  Hop to Savings!
+                  Hop to Savings! YOOOOO
                 </p>
               </div>
             </Link>

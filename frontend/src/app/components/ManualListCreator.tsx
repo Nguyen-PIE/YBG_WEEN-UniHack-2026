@@ -17,8 +17,7 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
   const [selectedItems, setSelectedItems] = useState<ProductWithPrices[]>([]);
   const [isLoading, setIsLoading] = useState(false); // Added for backend call
 
-  // Mock search logic remains local for speed, 
-  // but adding items stays the same
+
   const handleSearch = (query: string) => {
     // ... (keep your existing handleSearch logic)
     setCurrentItem(query);
