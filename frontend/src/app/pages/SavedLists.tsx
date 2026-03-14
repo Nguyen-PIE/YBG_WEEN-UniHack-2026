@@ -52,11 +52,6 @@ export function SavedLists() {
     <div className="space-y-6">
       {/* Header - Flat Style */}
       <Card className="bg-pink-600 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-md">
-        <img 
-          src="assets/bunny.png"
-          alt="Budget Bunny"
-          className="absolute right-4 -bottom-4 size-40 opacity-20 rotate-12"
-        />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <ListChecks className="size-10" />

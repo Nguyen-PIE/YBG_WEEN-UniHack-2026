@@ -123,7 +123,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
         <div className="space-y-2">
           <Label htmlFor="people" className="flex items-center gap-2 font-bold text-slate-700">
             <Users className="size-4 text-blue-600" />
-            Mouths
+            People
           </Label>
           <Input
             id="people"
