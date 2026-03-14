@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router';
 import { ShoppingCart, Tag, ListChecks } from 'lucide-react';
-import bunnyLogo from '../assets/bunny.png';
+export const BUNNY_LOGO = "https://storage.googleapis.com/unihack-assets-pierre/logo.png";
+
 
 export function Layout() {
   const location = useLocation();
@@ -18,7 +19,7 @@ export function Layout() {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <img 
-                src={bunnyLogo}
+                src={BUNNY_LOGO}
                 alt="Budget Bunny Mascot"
                 className="size-16 object-contain"
               />
