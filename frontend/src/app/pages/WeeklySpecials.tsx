@@ -3,7 +3,7 @@ import { products, stores } from '../data/mockData';
 import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { Tag, TrendingDown, Store } from 'lucide-react';
+import { Tag, TrendingDown, Store, Sparkles, Lightbulb } from 'lucide-react';
 
 export function WeeklySpecials() {
   const [selectedStore, setSelectedStore] = useState<string>('all');
@@ -37,38 +37,38 @@ export function WeeklySpecials() {
       });
     });
 
-    // Sort by savings percent (highest first)
     return specials.sort((a, b) => b.savingsPercent - a.savingsPercent);
   }, [selectedStore]);
 
-  const totalSavings = useMemo(() => {
-    return weeklySpecials.reduce((sum, special) => sum + special.savings, 0);
-  }, [weeklySpecials]);
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-2xl">
+    <div className="space-y-8">
+      {/* Header - Solid High-Contrast Style */}
+      <Card className="bg-orange-500 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-md">
         <img 
-          // src={bunnyIcon}
+          src="assets/bunny.png"
           alt="Budget Bunny"
-          className="absolute right-4 top-4 size-36 opacity-40"
+          className="absolute right-4 -bottom-4 size-40 opacity-20 -rotate-12"
         />
-        <div className="flex items-center gap-3 mb-3">
-          <Tag className="size-10" />
-          <h1 className="text-4xl font-black drop-shadow-lg">Hot Deals! 🔥</h1>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <Sparkles className="size-10 fill-white" />
+            <h1 className="text-4xl font-black tracking-tight">Hot Deals!</h1>
+          </div>
+          <p className="text-lg font-bold text-orange-100 uppercase tracking-wide">
+            The bunny's top picks for the week
+          </p>
         </div>
-        <p className="text-xl opacity-95 font-medium">
-          Check out this week's best sales and save big! 💰
-        </p>
       </Card>
 
-      {/* Store Filter */}
-      <div className="flex flex-wrap gap-3">
+      {/* Store Filter - Balanced Row */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-xs font-black uppercase text-slate-400 tracking-widest mr-2">Filter Store:</span>
         <Button
           variant={selectedStore === 'all' ? 'default' : 'outline'}
           onClick={() => setSelectedStore('all')}
-          className={selectedStore === 'all' ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl' : 'rounded-xl border-2'}
+          className={`rounded-xl font-bold transition-all ${
+            selectedStore === 'all' ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-200 text-slate-600'
+          }`}
         >
           <Store className="size-4 mr-2" />
           All Stores
@@ -80,7 +80,9 @@ export function WeeklySpecials() {
               key={store.id}
               variant={selectedStore === store.id ? 'default' : 'outline'}
               onClick={() => setSelectedStore(store.id)}
-              className={selectedStore === store.id ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl' : 'rounded-xl border-2'}
+              className={`rounded-xl font-bold transition-all ${
+                selectedStore === store.id ? 'bg-orange-500 text-white border-orange-500' : 'border-slate-200 text-slate-600'
+              }`}
             >
               {store.name}
             </Button>
@@ -91,76 +93,79 @@ export function WeeklySpecials() {
       {weeklySpecials.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {weeklySpecials.map((special, index) => (
-            <Card key={index} className="p-5 hover:shadow-xl transition-shadow bg-white border-2 border-orange-200 rounded-2xl">
-              <div className="flex items-start justify-between mb-3">
+            <Card key={index} className="p-6 bg-white border-2 border-slate-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-800">{special.productName}</h3>
-                  <p className="text-sm text-gray-600">{special.unit}</p>
-                  <Badge variant="outline" className="mt-2 border-orange-300 text-orange-700 rounded-lg">
-                    {special.storeName}
-                  </Badge>
+                  <h3 className="font-black text-xl text-slate-800 leading-tight">{special.productName}</h3>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter mt-1">{special.unit}</p>
                 </div>
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-none rounded-xl px-3 py-1 text-sm font-bold">
-                  {special.savingsPercent.toFixed(0)}% OFF
-                </Badge>
+                <div className="bg-red-500 text-white text-xs font-black px-3 py-1.5 rounded-xl uppercase tracking-tighter">
+                  {special.savingsPercent.toFixed(0)}% Off
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3 bg-slate-50 p-4 rounded-2xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Was:</span>
-                  <span className="text-sm line-through text-gray-500 font-medium">
+                  <span className="text-xs font-bold text-slate-500 uppercase">Regular</span>
+                  <span className="text-sm line-through text-slate-400 font-bold">
                     ${special.regularPrice.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-gray-800">Now:</span>
-                  <span className="text-2xl font-black text-green-600">
+                  <span className="text-xs font-bold text-slate-500 uppercase">Bunny Price</span>
+                  <span className="text-2xl font-black text-emerald-600">
                     ${special.salePrice.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t-2 border-dashed border-green-200">
-                  <span className="text-sm font-bold text-green-700 flex items-center gap-1">
-                    <TrendingDown className="size-4" />
-                    Save:
+                <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                  <span className="text-xs font-black text-emerald-700 uppercase flex items-center gap-1">
+                    <TrendingDown className="size-3" />
+                    You Save
                   </span>
-                  <span className="text-lg font-black text-green-700">
+                  <span className="text-lg font-black text-emerald-700">
                     ${special.savings.toFixed(2)}
                   </span>
                 </div>
+              </div>
+              
+              <div className="mt-4 flex items-center gap-2">
+                <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none px-3 py-1 rounded-lg font-bold">
+                  {special.storeName}
+                </Badge>
               </div>
             </Card>
           ))}
         </div>
       ) : (
-        <Card className="p-12 text-center bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-3xl">
-          <Tag className="size-16 mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600 text-lg font-medium">No weekly specials found for the selected store.</p>
+        <Card className="p-16 text-center bg-white border-2 border-dashed border-slate-200 rounded-3xl">
+          <Tag className="size-16 mx-auto text-slate-200 mb-4" />
+          <p className="text-slate-500 text-lg font-bold">No deals found for this store yet.</p>
         </Card>
       )}
 
-      {/* Tips Section */}
-      <Card className="p-8 bg-gradient-to-br from-yellow-100 to-amber-100 border-none rounded-3xl shadow-lg">
-        <h3 className="font-black text-amber-900 mb-4 text-xl flex items-center gap-2">
-          💡 Pro Tips for Saving!
-        </h3>
-        <ul className="space-y-3 text-sm text-amber-900">
-          <li className="flex items-start gap-2">
-            <span className="text-lg">🗓️</span>
-            <span>Check every Sunday when fresh deals drop!</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-lg">📦</span>
-            <span>Stock up on stuff that won't go bad when it's on sale</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-lg">✂️</span>
-            <span>Stack deals with coupons for mega savings!</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-lg">🍳</span>
-            <span>Plan your meals around what's on sale this week</span>
-          </li>
-        </ul>
+      {/* Tips Section - Solid Amber Bento Box */}
+      <Card className="p-8 bg-amber-50 border-2 border-amber-100 rounded-3xl">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="bg-amber-100 p-2 rounded-xl">
+            <Lightbulb className="size-6 text-amber-600 fill-amber-600" />
+          </div>
+          <h3 className="font-black text-amber-900 text-xl tracking-tight">
+            Pro Tips for Saving
+          </h3>
+        </div>
+        
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[
+            { text: 'New deals drop every Sunday' },
+            { text: 'Stock up on pantry staples' },
+            { text: 'Stack deals with digital coupons' },
+            { text: 'Meal plan based on this list' }
+          ].map((tip, i) => (
+            <div key={i} className="flex items-center gap-3 bg-white p-4 rounded-2xl border border-amber-100 shadow-sm">
+              <span className="text-sm font-bold text-amber-900 leading-tight">{tip.text}</span>
+            </div>
+          ))}
+        </div>
       </Card>
     </div>
   );

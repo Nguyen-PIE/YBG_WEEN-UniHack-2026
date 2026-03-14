@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from 'react-router';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { ShoppingCart, Tag, ListChecks } from 'lucide-react';
 
 export function Layout() {
@@ -11,19 +11,23 @@ export function Layout() {
   ];
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <header className="bg-white shadow-md border-b-4 border-pink-300">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="bg-white shadow-sm border-b-4 border-pink-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <img 
-                src={"assets/bunny.png"}
+                src="assets/bunny.png"
                 alt="Budget Bunny Mascot"
-                className="size-16"
+                className="size-16 object-contain"
               />
               <div>
-                <h1 className="text-3xl font-black  from-pink-600 to-purple-600 bg-clip-text text-transparent">Budget Bunny</h1>
-                <p className="text-sm text-gray-600 font-medium">Hop to savings!</p>
+                <h1 className="text-3xl font-black text-pink-600 tracking-tight">
+                  Budget Bunny
+                </h1>
+                <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">
+                  Hop to savings!
+                </p>
               </div>
             </Link>
             
@@ -35,10 +39,10 @@ export function Layout() {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-2xl transition-all font-semibold ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold ${
                       isActive
-                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg scale-105'
-                        : 'text-gray-700 hover:bg-purple-100'
+                        ? 'bg-pink-600 text-white shadow-md transform -translate-y-0.5'
+                        : 'text-slate-600 hover:bg-pink-50 hover:text-pink-600'
                     }`}
                   >
                     <Icon className="size-5" />

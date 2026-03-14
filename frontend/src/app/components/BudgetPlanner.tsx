@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
-import { DollarSign, Users, Utensils } from 'lucide-react';
+import { DollarSign, Users, Utensils, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BudgetPlannerProps {
@@ -36,7 +36,6 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
       return;
     }
 
-    // Budget allocation strategy: prioritize essentials
     const essentialCategories = ['Grains', 'Proteins', 'Vegetables'];
     const budgetPerCategory = budgetNum / 3;
 
@@ -44,18 +43,15 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
     let totalCost = 0;
     let totalCalories = 0;
 
-    // Select products from each essential category
     essentialCategories.forEach((category) => {
       const categoryProducts = products.filter((p) => p.category === category);
       let categorySpent = 0;
 
       categoryProducts.forEach((product) => {
-        // Find cheapest price for this product
         const cheapestPrice = Math.min(
           ...product.prices.map((p) => p.salePrice || p.price)
         );
 
-        // Add if within category budget and overall budget
         if (
           categorySpent + cheapestPrice <= budgetPerCategory &&
           totalCost + cheapestPrice <= budgetNum
@@ -68,7 +64,6 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
       });
     });
 
-    // Try to add more items if budget allows
     const remainingProducts = products.filter(
       (p) => !selectedProducts.includes(p)
     );
@@ -91,71 +86,76 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
     }
 
     toast.success(
-      `Generated list with ${selectedProducts.length} items (~$${totalCost.toFixed(2)}, ${totalCalories.toLocaleString()} calories)`
+      `Generated list with ${selectedProducts.length} items (~$${totalCost.toFixed(2)})`
     );
     onGenerateList(selectedProducts);
   };
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-dashed border-pink-300 rounded-3xl">
-      <h2 className="text-2xl font-bold mb-2 text-gray-800">💸 Budget Magic!</h2>
-      <p className="text-sm text-gray-700 mb-6">
-        Tell us your budget and we'll create a shopping list that keeps you fed! 🥕
-      </p>
+    <Card className="p-8 bg-white border-2 border-slate-200 rounded-3xl shadow-sm">
+      <div className="mb-6">
+        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+          <Sparkles className="size-6 text-pink-500 fill-pink-500" />
+          Budget Magic
+        </h2>
+        <p className="text-slate-500 font-medium">
+          Input your constraints and let the bunny find your meals.
+        </p>
+      </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="budget" className="flex items-center gap-2 mb-2 font-semibold text-gray-700">
-            <DollarSign className="size-5 text-green-600" />
-            Your Budget
+      {/* Symmetrical 3-column grid for desktop, stacked for mobile */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="space-y-2">
+          <Label htmlFor="budget" className="flex items-center gap-2 font-bold text-slate-700">
+            <DollarSign className="size-4 text-emerald-600" />
+            Budget
           </Label>
           <Input
             id="budget"
             type="number"
-            placeholder="15.00"
+            placeholder="0.00"
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
-            min="0"
-            step="0.01"
-            className="text-lg py-6 border-2 border-pink-300 rounded-2xl focus:border-purple-400"
+            className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
           />
         </div>
 
-        <div>
-          <Label htmlFor="people" className="flex items-center gap-2 mb-2 font-semibold text-gray-700">
-            <Users className="size-5 text-blue-600" />
-            People to Feed
+        <div className="space-y-2">
+          <Label htmlFor="people" className="flex items-center gap-2 font-bold text-slate-700">
+            <Users className="size-4 text-blue-600" />
+            Mouths
           </Label>
           <Input
             id="people"
             type="number"
-            placeholder="2"
+            placeholder="1"
             value={people}
             onChange={(e) => setPeople(e.target.value)}
-            min="1"
-            className="text-lg py-6 border-2 border-pink-300 rounded-2xl focus:border-purple-400"
+            className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
           />
         </div>
 
-        <div className="sm:col-span-2">
-          <Label htmlFor="meals" className="flex items-center gap-2 mb-2 font-semibold text-gray-700">
-            <Utensils className="size-5 text-orange-600" />
-            Number of Meals
+        <div className="space-y-2">
+          <Label htmlFor="meals" className="flex items-center gap-2 font-bold text-slate-700">
+            <Utensils className="size-4 text-orange-600" />
+            Meals
           </Label>
           <Input
             id="meals"
             type="number"
-            placeholder="7"
+            placeholder="1"
             value={meals}
             onChange={(e) => setMeals(e.target.value)}
-            min="1"
-            className="text-lg py-6 border-2 border-pink-300 rounded-2xl focus:border-purple-400"
+            className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
           />
         </div>
       </div>
 
-      <Button onClick={generateGroceryList} className="w-full mt-6 py-6 text-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
-        Create My Meal!
+      <Button 
+        onClick={generateGroceryList} 
+        className="w-full mt-8 h-14 text-lg font-bold bg-pink-600 hover:bg-pink-700 text-white rounded-2xl shadow-md transition-all active:scale-[0.98]"
+      >
+        Generate My Grocery List
       </Button>
     </Card>
   );
