@@ -24,7 +24,7 @@ export function Layout() {
               />
               <div>
                 <h1 className="text-3xl font-black text-pink-600 tracking-tight">
-                  Budget Bunny
+                  FAT Budget Bunny
                 </h1>
                 <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">
                   Hop to Savings! YOOOOO

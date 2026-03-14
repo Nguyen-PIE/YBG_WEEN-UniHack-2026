@@ -166,11 +166,6 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
         disabled={selectedItems.length === 0 || isLoading}
         className="w-full h-16 text-lg font-black bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
       >
-        {isLoading ? (
-          <Loader2 className="size-6 animate-spin" />
-        ) : (
-          <Sparkles className="size-5 fill-white" />
-        )}
         {isLoading ? "Comparing Stores..." : "Find Cheapest Store"}
       </Button>
     </Card>
