@@ -1,15 +1,19 @@
 import requests
 import json
+import os
+from dotenv import load_dotenv
 
-ELASTIC_URL = "https://my-elasticsearch-project-a9ecb7.es.australiaeast.azure.elastic.cloud:443"  
-API_KEY = "TVVaUjZwd0JEVEZRWnNvODdVRlk6dmk1eGhmZE1BbnVJTXhBM0l4NnVMQQ=="
+load_dotenv()
+
+ELASTIC_URL = os.getenv("ELASTIC_URL")
+ELASTIC_API_KEY = os.getenv("ELASTIC_API_KEY")
 INDEX_NAME = "shopping-data"
 # The search endpoint
 SEARCH_URL = f"{ELASTIC_URL}/{INDEX_NAME}/_search"
 
 # Headers for authentication
 headers = {
-    "Authorization": f"ApiKey {API_KEY}",
+    "Authorization": f"ApiKey {ELASTIC_API_KEY}",
     "Content-Type": "application/json"
 }
 
