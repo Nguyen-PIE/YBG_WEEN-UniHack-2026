@@ -41,7 +41,7 @@ export const products: ProductWithPrices[] = [
     id: 'rice',
     name: 'White Rice',
     category: 'Grains',
-    unit: '5 lb bag',
+    unit: '5 kg bag',
     calories: 2000,
     servings: 20,
     prices: [
@@ -55,7 +55,7 @@ export const products: ProductWithPrices[] = [
     id: 'beans',
     name: 'Pinto Beans',
     category: 'Proteins',
-    unit: '2 lb bag',
+    unit: '2 kg bag',
     calories: 1200,
     servings: 12,
     prices: [
@@ -69,7 +69,7 @@ export const products: ProductWithPrices[] = [
     id: 'pasta',
     name: 'Spaghetti',
     category: 'Grains',
-    unit: '1 lb box',
+    unit: '1 kg box',
     calories: 1600,
     servings: 8,
     prices: [
@@ -97,7 +97,7 @@ export const products: ProductWithPrices[] = [
     id: 'bread',
     name: 'Whole Wheat Bread',
     category: 'Grains',
-    unit: '20 oz loaf',
+    unit: '20 ml loaf',
     calories: 1400,
     servings: 20,
     prices: [
@@ -125,7 +125,7 @@ export const products: ProductWithPrices[] = [
     id: 'chicken',
     name: 'Chicken Breast',
     category: 'Proteins',
-    unit: '2 lb pack',
+    unit: '2 kg pack',
     calories: 1000,
     servings: 8,
     prices: [
@@ -139,7 +139,7 @@ export const products: ProductWithPrices[] = [
     id: 'potatoes',
     name: 'Russet Potatoes',
     category: 'Vegetables',
-    unit: '5 lb bag',
+    unit: '5 kg bag',
     calories: 1750,
     servings: 15,
     prices: [
@@ -153,7 +153,7 @@ export const products: ProductWithPrices[] = [
     id: 'carrots',
     name: 'Baby Carrots',
     category: 'Vegetables',
-    unit: '2 lb bag',
+    unit: '2 kg bag',
     calories: 300,
     servings: 10,
     prices: [
@@ -167,7 +167,7 @@ export const products: ProductWithPrices[] = [
     id: 'cheese',
     name: 'Cheddar Cheese',
     category: 'Dairy',
-    unit: '8 oz block',
+    unit: '8 ml block',
     calories: 900,
     servings: 8,
     prices: [
@@ -181,7 +181,7 @@ export const products: ProductWithPrices[] = [
     id: 'oatmeal',
     name: 'Rolled Oats',
     category: 'Grains',
-    unit: '42 oz canister',
+    unit: '42 ml canister',
     calories: 4200,
     servings: 30,
     prices: [
@@ -195,7 +195,7 @@ export const products: ProductWithPrices[] = [
     id: 'oil',
     name: 'Vegetable Oil',
     category: 'Cooking',
-    unit: '48 oz bottle',
+    unit: '48 ml bottle',
     calories: 12000,
     servings: 96,
     prices: [
@@ -209,7 +209,7 @@ export const products: ProductWithPrices[] = [
     id: 'tomatoes',
     name: 'Canned Tomatoes',
     category: 'Vegetables',
-    unit: '28 oz can',
+    unit: '28 ml can',
     calories: 200,
     servings: 7,
     prices: [
@@ -223,7 +223,7 @@ export const products: ProductWithPrices[] = [
     id: 'onions',
     name: 'Yellow Onions',
     category: 'Vegetables',
-    unit: '3 lb bag',
+    unit: '3 kg bag',
     calories: 450,
     servings: 10,
     prices: [
@@ -237,7 +237,7 @@ export const products: ProductWithPrices[] = [
     id: 'peanutbutter',
     name: 'Peanut Butter',
     category: 'Proteins',
-    unit: '16 oz jar',
+    unit: '16 ml jar',
     calories: 2800,
     servings: 16,
     prices: [
