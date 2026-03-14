@@ -9,7 +9,6 @@ import { Input } from '../components/ui/input';
 import { Save, Heart } from 'lucide-react';
 import { saveList, generateId } from '../utils/storage';
 import { toast } from 'sonner';
-import bunnyIcon from 'figma:asset/3fe3d535f340869e5c4ecbe83e7dd1670ca78e35.png';
 
 export function Home() {
   const [generatedList, setGeneratedList] = useState<ProductWithPrices[]>([]);
@@ -34,36 +33,30 @@ export function Home() {
       createdAt: new Date(),
     });
 
-    toast.success(`Saved "${name}" 💾`);
+    toast.success(`Saved "${name}"`);
     setListName('');
   };
 
   return (
     <div className="space-y-6">
       {/* Hero Section */}
-      <Card className="bg-gradient-to-r from-pink-400 via-purple-400 to-orange-400 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-2xl">
-        <img 
-          src={bunnyIcon}
-          alt="Budget Bunny"
-          className="absolute -right-4 -top-4 size-40 opacity-40 animate-bounce"
-          style={{ animationDuration: '3s' }}
-        />
-        <h1 className="text-4xl font-black mb-3 drop-shadow-lg">
-          Make Every Dollar Count! 💰
+      <Card className="bg-purple-600 text-white p-10 rounded-3xl border-none shadow-md">
+        <h1 className="text-4xl font-black mb-3 text-shadow-sm">
+          Make Every Dollar Count!
         </h1>
         <p className="text-xl opacity-95 font-medium">
-          Your friendly bunny buddy helping you find the best grocery deals 🥕✨
+          Your friendly Bunny Buddy helping you find the best grocery deals
         </p>
       </Card>
 
       {/* Main Search Tabs */}
       <Tabs defaultValue="budget" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 h-14 bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl border-2 border-pink-300">
-          <TabsTrigger value="budget" className="rounded-xl text-base font-semibold data-[state=active]:bg-white data-[state=active]:shadow-lg">
-            💸 Budget Planner
+        <TabsList className="grid w-full grid-cols-2 mb-6 h-14 bg-pink-100 rounded-2xl border-2 border-pink-300">
+          <TabsTrigger value="budget" className="rounded-xl text-base font-semibold data-[state=active]:bg-white data-[state=active]:shadow-md">
+            Budget Planner
           </TabsTrigger>
-          <TabsTrigger value="manual" className="rounded-xl text-base font-semibold data-[state=active]:bg-white data-[state=active]:shadow-lg">
-            📝 Create List
+          <TabsTrigger value="manual" className="rounded-xl text-base font-semibold data-[state=active]:bg-white data-[state=active]:shadow-md">
+            Create List
           </TabsTrigger>
         </TabsList>
 
@@ -78,10 +71,10 @@ export function Home() {
 
       {/* Generated List Display */}
       {generatedList.length > 0 && (
-        <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-3xl shadow-xl">
+        <Card className="p-6 bg-emerald-50 border-2 border-green-300 rounded-3xl shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              🛒 Your Shopping List ({generatedList.length} items)
+              Your Shopping List ({generatedList.length} items)
             </h3>
             <div className="flex items-center gap-2">
               <Input
@@ -91,7 +84,7 @@ export function Home() {
                 onChange={(e) => setListName(e.target.value)}
                 className="w-48 rounded-xl border-2 border-green-300"
               />
-              <Button onClick={handleSaveList} className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl shadow-md">
+              <Button onClick={handleSaveList} className="bg-green-600 hover:bg-green-700 rounded-xl shadow-sm">
                 <Heart className="size-4 mr-2" />
                 Save It!
               </Button>
@@ -108,7 +101,7 @@ export function Home() {
               );
 
               return (
-                <Card key={product.id} className="p-4 bg-white border-2 border-green-200 rounded-2xl hover:shadow-lg transition-shadow">
+                <Card key={product.id} className="p-4 bg-white border-2 border-green-200 rounded-2xl hover:shadow-md transition-shadow">
                   <h4 className="font-bold text-gray-800">{product.name}</h4>
                   <p className="text-sm text-gray-600 mb-2">{product.unit}</p>
                   <div className="mt-2 flex items-center justify-between">
@@ -128,24 +121,21 @@ export function Home() {
 
       {/* Info Cards */}
       <div className="grid gap-5 sm:grid-cols-3">
-        <Card className="p-6 border-none bg-gradient-to-br from-green-100 to-emerald-100 rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl mb-3">🏪</div>
+        <Card className="p-6 border-none bg-emerald-100 rounded-3xl shadow-md hover:shadow-lg transition-shadow">
           <h3 className="font-bold text-green-900 mb-2 text-lg">Community Love</h3>
           <p className="text-sm text-green-800">
             Find local food pantries with free or cheap essentials when you need 'em most!
           </p>
         </Card>
         
-        <Card className="p-6 border-none bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl mb-3">💸</div>
+        <Card className="p-6 border-none bg-blue-100 rounded-3xl shadow-md hover:shadow-lg transition-shadow">
           <h3 className="font-bold text-blue-900 mb-2 text-lg">Real Prices</h3>
           <p className="text-sm text-blue-800">
             We check prices at all the big stores so you don't have to!
           </p>
         </Card>
         
-        <Card className="p-6 border-none bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl mb-3">🧠</div>
+        <Card className="p-6 border-none bg-pink-100 rounded-3xl shadow-md hover:shadow-lg transition-shadow">
           <h3 className="font-bold text-purple-900 mb-2 text-lg">Smart Bunny</h3>
           <p className="text-sm text-purple-800">
             Get lists that match your budget AND keep you fed with good nutrition!

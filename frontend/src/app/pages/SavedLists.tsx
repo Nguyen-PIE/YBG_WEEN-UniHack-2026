@@ -17,7 +17,6 @@ import {
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog';
 import { toast } from 'sonner';
-import bunnyIcon from 'figma:asset/3fe3d535f340869e5c4ecbe83e7dd1670ca78e35.png';
 
 export function SavedLists() {
   const [savedLists, setSavedLists] = useState<ShoppingList[]>([]);
@@ -54,7 +53,7 @@ export function SavedLists() {
       {/* Header */}
       <Card className="bg-gradient-to-r from-purple-400 to-pink-400 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-2xl">
         <img 
-          src={bunnyIcon}
+          src={"assets/bunny.png"}
           alt="Budget Bunny"
           className="absolute right-4 top-4 size-36 opacity-40"
         />
