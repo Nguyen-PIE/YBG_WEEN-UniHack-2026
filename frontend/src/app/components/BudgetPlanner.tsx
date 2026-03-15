@@ -32,8 +32,8 @@ const generateGroceryList = async () => {
 
     try {
       const API_URL = (import.meta as any).env.VITE_API_URL || "http://localhost:8000";
-      
-      const response = await fetch(`${API_URL}/generate-recipe`, {
+
+        const response = await fetch(`${API_URL}/generate-recipe`, {        
         method: "POST",
         headers: {
           "Content-Type": "application/json",
