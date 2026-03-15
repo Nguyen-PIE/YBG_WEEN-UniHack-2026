@@ -31,8 +31,8 @@ const generateGroceryList = async () => {
     const loadingToast = toast.loading("Bunny is crunching the numbers...");
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
+      const API_URL = (import.meta as any).env.VITE_API_URL || "http://localhost:8000";
+      
       const response = await fetch(`${API_URL}/generate-recipe`, {
         method: "POST",
         headers: {
