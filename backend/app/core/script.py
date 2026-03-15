@@ -126,7 +126,41 @@ def test_basket_optimizer():
     print("\n")
 
 # ==========================================
-# 5. RUN THE DEMO
+# 5. PRICE COMPARISON FOR API
+# ==========================================
+def run_elastic_comparison(items: list) -> list:
+    """Search Elasticsearch for the cheapest option for each item in the list."""
+    results = []
+    for item in items:
+        query = {
+            "query": {
+                "match": {
+                    "product_name": {
+                        "query": item,
+                        "fuzziness": "AUTO"
+                    }
+                }
+            },
+            "sort": [{"price": "asc"}],
+            "size": 5
+        }
+        response = requests.post(SEARCH_URL, headers=headers, json=query)
+        data = response.json()
+        hits = data.get("hits", {}).get("hits", [])
+        if hits:
+            cheapest = hits[0]["_source"]
+            results.append({
+                "item": item,
+                "product_name": cheapest.get("product_name", item),
+                "store_name": cheapest.get("store_name", ""),
+                "price": cheapest.get("price", 0),
+                "store_type": cheapest.get("store_type", ""),
+                "category": cheapest.get("category", "")
+            })
+    return results
+
+# ==========================================
+# 6. RUN THE DEMO
 # ==========================================
 if __name__ == "__main__":
     test_fuzzy_search()
