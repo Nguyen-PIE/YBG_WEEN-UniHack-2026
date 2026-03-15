@@ -43,10 +43,10 @@ export function Home() {
       <div className="text-primary py-12 px-4 text-center">
         <div className="relative z-10">
           <h1 className="text-5xl font-black mb-4 italic tracking-tighter uppercase">
-            Make Every <span className="text-primary">Dollar</span> Count!
+            Make Every <span className="text-primary">Dollar</span> Count
           </h1>
           <p className="text-lg font-black uppercase tracking-[0.2em] opacity-80">
-            Your friendly Bunny Buddy helping you find the best grocery deals
+            Your friendly Bunny Buddy helping you find the best grocery deals!
           </p>
         </div>
         {/* Subtle decorative circle for that Y2K look */}

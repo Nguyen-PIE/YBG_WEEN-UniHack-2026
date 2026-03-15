@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getSavedLists, deleteList } from '../utils/storage';
 import { ShoppingList, products } from '../data/mockData';
-import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { ListChecks, Trash2, Calendar, DollarSign, Eye, EyeOff } from 'lucide-react';
+import { ListChecks, Trash2, Calendar, DollarSign, Eye, EyeOff, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { Link } from 'react-router';
 
 export function SavedLists() {
   const [savedLists, setSavedLists] = useState<ShoppingList[]>([]);
@@ -49,23 +49,22 @@ export function SavedLists() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header - Flat Style */}
-      <Card className="bg-pink-600 text-white p-10 relative overflow-hidden rounded-3xl border-none shadow-md">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <ListChecks className="size-10" />
-            <h1 className="text-4xl font-black tracking-tight">Your Lists</h1>
-          </div>
-          <p className="text-lg font-bold text-pink-100 uppercase tracking-wide">
-            Manage your saved shop hauls
-          </p>
+    <div className="space-y-12 pb-20">
+      {/* Header - Transparent & Floating */}
+      <div className="text-center py-10">
+        <div className="flex items-center justify-center gap-4 mb-3">
+          <h1 className="text-6xl font-black text-primary italic uppercase tracking-tighter">
+            Your Lists
+          </h1>
         </div>
-      </Card>
+        <p className="text-primary/60 font-black uppercase text-[10px] tracking-[0.4em]">
+          Manage your saved lists
+        </p>
+      </div>
 
-      {/* Saved Lists */}
+      {/* Saved Lists Content */}
       {savedLists.length > 0 ? (
-        <div className="grid gap-4">
+        <div className="grid gap-8 max-w-4xl mx-auto">
           {savedLists
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
             .map((list) => {
@@ -73,56 +72,66 @@ export function SavedLists() {
               const isExpanded = expandedList === list.id;
 
               return (
-                <Card key={list.id} className="p-6 bg-white border-2 border-slate-200 rounded-3xl shadow-sm">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div 
+                  key={list.id} 
+                  className="bg-white border-4 border-primary p-8 rounded-[2.5rem] shadow-[10px_10px_0px_0px_rgba(93,130,193,0.2)] hover:shadow-[14px_14px_0px_0px_#5D82C1] transition-all"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-black text-slate-800 mb-2">{list.name}</h3>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-xl text-slate-600 font-bold text-xs uppercase">
+                      <h3 className="text-3xl font-black text-primary italic uppercase tracking-tight mb-3">
+                        {list.name}
+                      </h3>
+                      <div className="flex flex-wrap gap-3">
+                        <span className="flex items-center gap-1.5 bg-primary/5 px-4 py-1.5 rounded-full border-2 border-primary/10 text-primary font-black text-[10px] uppercase tracking-widest">
                           <Calendar className="size-3" />
                           {list.createdAt.toLocaleDateString()}
                         </span>
-                        <Badge variant="secondary" className="bg-pink-100 text-pink-700 hover:bg-pink-100 border-none rounded-xl px-3 py-1 font-bold">
+                        <Badge className="bg-secondary border-2 border-primary text-primary rounded-full px-4 py-1.5 font-black uppercase text-[10px] tracking-widest">
                           {list.items.length} items
                         </Badge>
-                        <span className="flex items-center gap-1 font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl text-sm">
-                          <DollarSign className="size-4" />
-                          {total.toFixed(2)}
+                        <span className="flex items-center gap-1 font-black text-primary italic text-2xl tracking-tighter">
+                          ${total.toFixed(2)}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <Button
-                        variant="outline"
                         onClick={() => setExpandedList(isExpanded ? null : list.id)}
-                        className={`rounded-xl border-2 font-bold flex gap-2 ${
-                          isExpanded ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-200 text-slate-600'
+                        className={`h-14 px-6 rounded-full border-4 font-black uppercase tracking-widest flex gap-2 transition-all ${
+                          isExpanded 
+                            ? 'bg-primary text-white border-primary shadow-[4px_4px_0px_0px_rgba(45,62,97,0.3)]' 
+                            : 'bg-white border-primary text-primary shadow-[4px_4px_0px_0px_#5D82C1]'
                         }`}
                       >
-                        {isExpanded ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        {isExpanded ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                         {isExpanded ? 'Hide' : 'View'}
                       </Button>
+                      
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="outline" className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl border-2 border-slate-200">
-                            <Trash2 className="size-4" />
+                          <Button className="h-14 w-14 p-0 bg-white border-4 border-primary text-primary hover:text-secondary rounded-full shadow-[4px_4px_0px_0px_#5D82C1] transition-all">
+                            <Trash2 className="size-6" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                        <AlertDialogContent className="rounded-[3rem] border-4 border-primary bg-background shadow-[15px_15px_0px_0px_#5D82C1]">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-2xl font-black">Delete this list?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-slate-500 font-medium">
-                              Are you sure you want to delete "{list.name}"? This action cannot be undone.
+                            <AlertDialogTitle className="text-3xl font-black text-primary italic uppercase tracking-tighter">
+                              Delete list?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-primary/60 font-bold uppercase text-xs tracking-widest">
+                              Are you sure you want to delete "{list.name}"?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="gap-2">
-                            <AlertDialogCancel className="rounded-xl font-bold border-2">Cancel</AlertDialogCancel>
+                          <AlertDialogFooter className="gap-3 mt-6">
+                            <AlertDialogCancel className="rounded-full border-4 border-primary font-black uppercase tracking-widest h-12">
+                              Cancel
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(list.id, list.name)}
-                              className="bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold"
+                              className="bg-secondary border-4 border-primary text-primary rounded-full font-black uppercase tracking-widest h-12"
                             >
-                              Delete List
+                              Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -131,9 +140,9 @@ export function SavedLists() {
                   </div>
 
                   {isExpanded && (
-                    <div className="mt-6 pt-6 border-t-2 border-slate-100">
-                      <h4 className="font-black mb-4 text-slate-400 text-xs uppercase tracking-widest">Items in list</h4>
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="mt-8 pt-8 border-t-4 border-primary/10">
+                      <h4 className="font-black mb-6 text-primary/40 text-[10px] uppercase tracking-[0.3em]">Items in haul</h4>
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {list.items.map((itemId) => {
                           const product = products.find((p) => p.id === itemId);
                           if (!product) return null;
@@ -145,42 +154,46 @@ export function SavedLists() {
                           );
 
                           return (
-                            <Card key={itemId} className="p-4 bg-slate-50 border-none rounded-2xl">
-                              <div className="flex justify-between items-start mb-1">
-                                <h5 className="font-bold text-slate-800">{product.name}</h5>
-                                <span className="font-black text-emerald-600">${cheapestPrice.toFixed(2)}</span>
+                            <div key={itemId} className="p-5 bg-primary/5 border-2 border-primary/20 rounded-2xl group hover:border-primary transition-colors">
+                              <div className="flex justify-between items-start mb-3">
+                                <h5 className="font-black text-primary uppercase text-sm leading-tight tracking-tight">{product.name}</h5>
+                                <span className="font-black text-primary italic">${cheapestPrice.toFixed(2)}</span>
                               </div>
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">
                                   {product.unit}
                                 </span>
-                                <span className="text-[10px] font-bold bg-white px-2 py-0.5 rounded-md border border-slate-200 text-slate-500">
+                                <span className="text-[9px] font-black uppercase bg-white px-2 py-1 rounded-md border-2 border-primary/10 text-primary/60">
                                   {cheapestStore?.storeName}
                                 </span>
                               </div>
-                            </Card>
+                            </div>
                           );
                         })}
                       </div>
                     </div>
                   )}
-                </Card>
+                </div>
               );
             })}
         </div>
       ) : (
-        <Card className="p-16 text-center bg-white border-2 border-dashed border-slate-200 rounded-3xl">
-          <div className="bg-slate-50 size-24 rounded-full flex items-center justify-center mx-auto mb-6">
-            <ListChecks className="size-12 text-slate-300" />
+        /* Empty State - Scrapbook Style */
+        <div className="max-w-2xl mx-auto p-16 text-center border-4 border-dashed border-primary/20 rounded-[3rem] bg-white/50">
+          <div className="bg-accent/20 size-28 rounded-full border-4 border-primary flex items-center justify-center mx-auto mb-8 shadow-[8px_8px_0px_0px_#5D82C1]">
+            <ListChecks className="size-14 text-primary" />
           </div>
-          <h3 className="text-2xl font-black text-slate-800 mb-2">Nothing saved yet!</h3>
-          <p className="text-slate-500 font-medium mb-8 max-w-xs mx-auto">
-            Your shopping lists will appear here once you've saved them from the search page.
+          <h3 className="text-4xl font-black text-primary italic uppercase tracking-tighter mb-4">Nothing saved yet!</h3>
+          <p className="text-primary/60 font-bold uppercase text-[10px] tracking-[0.2em] mb-12 max-w-xs mx-auto">
+            Your shopping lists will appear here once saved
           </p>
-          <Button asChild className="bg-pink-600 hover:bg-pink-700 text-white rounded-2xl px-10 py-6 text-lg font-bold shadow-md">
-            <a href="/">Find Groceries</a>
+          
+          <Link to="/">
+          <Button className="w-[90%] md:w-auto h-16 md:h-20 px-6 md:px-12 text-lg md:text-2xl font-black bg-secondary border-4 border-primary text-foreground rounded-full shadow-[6px_6px_0px_0px_#5D82C1] transition-all active:scale-[0.95] uppercase tracking-[0.1em] md:tracking-[0.25em]">
+            Find Groceries
           </Button>
-        </Card>
+          </Link>
+        </div>
       )}
     </div>
   );
