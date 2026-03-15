@@ -127,7 +127,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
         {isLoading ? (
           <Loader2 className="size-8 animate-spin" />
         ) : (
-          "Lets Hop!"
+          "Let\'s Hop!"
         )}
       </Button>
     </div>
