@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
-import { WeeklySpecials } from './pages/WeeklySpecials';
+import { WeeklySpecials } from './pages/PriceComparisonPage';
 import { SavedLists } from './pages/SavedLists';
 import { Recipes } from './pages/Recipes';
 

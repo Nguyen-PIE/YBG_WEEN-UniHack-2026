@@ -10,28 +10,25 @@ import { Heart, Sparkles } from 'lucide-react';
 import { saveList, generateId } from '../utils/storage';
 import { toast } from 'sonner';
 
-// Carousel Imports
 import LogoLoop from '../components/LogoLoop'; 
-
-// REPLACED REACT ICONS WITH CDN IMAGES AND FIXED SIZING
 const storeLogos = [
   { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/Woolworths_Ltd._logo_(2022).svg" alt="Woolworths" className="h-8 w-24 object-contain" />, 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/Woolworths_Ltd._logo_(2022).svg" alt="Woolworths" className="h-12 w-28 object-contain" />, 
     title: "Woolies", 
     href: "#" 
   },
   { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/aldi_logo.png" alt="Aldi" className="h-8 w-24 object-contain" />, 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/aldi_logo.png" alt="Aldi" className="h-12 w-28 object-contain" />, 
     title: "Aldi", 
     href: "#" 
   },
   { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/coles_logo.jpg" alt="Coles" className="h-8 w-24 object-contain" />, 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/coles_logo.jpg" alt="Coles" className="h-12 w-28 object-contain" />, 
     title: "Coles", 
     href: "#" 
   },
   { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/IGA_logo.svg" alt="IGA" className="h-8 w-24 object-contain" />, 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/IGA_logo.svg" alt="IGA" className="h-12 w-28 object-contain" />, 
     title: "IGA", 
     href: "#" 
   },
@@ -76,7 +73,6 @@ export function Home() {
             Your friendly Bunny Buddy helping you find the best grocery deals!
           </p>
           
-          {/* CAROUSEL INSERTED HERE */}
           <div className="max-w-xl mx-auto h-[60px] relative overflow-hidden">
             <LogoLoop
               logos={storeLogos}
@@ -87,7 +83,7 @@ export function Home() {
               hoverSpeed={0}
               scaleOnHover
               fadeOut
-              fadeOutColor="#f8fafc" // Adjust this hex to match your background color
+              fadeOutColor="#f8fafc"
               ariaLabel="Supermarket partners"
             />
           </div>
