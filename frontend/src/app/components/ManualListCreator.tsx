@@ -59,11 +59,12 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
     const loadingToast = toast.loading("Bunny is checking store prices...");
 
     try {
-      const response = await fetch("http://localhost:8000/search-prices", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/manual-list`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          items: selectedItems.map(i => i.name) // Sending names to your Python script
+          items: selectedItems.map(i => i.name)
         }),
       });
 

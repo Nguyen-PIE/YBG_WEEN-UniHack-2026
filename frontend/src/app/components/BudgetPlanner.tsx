@@ -65,8 +65,7 @@ const generateGroceryList = async () => {
     <Card className="p-8 bg-white border-2 border-slate-200 rounded-3xl shadow-sm">
       <div className="mb-6">
         <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2 font-display">
-          <Sparkles className="size-6 text-pink-500 fill-pink-500" />
-          Budget Magic
+          Bunny Magic
         </h2>
         <p className="text-slate-500 font-medium">
           Input your constraints and let the bunny find your meals.
