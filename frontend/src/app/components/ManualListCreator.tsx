@@ -17,8 +17,7 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
   const [selectedItems, setSelectedItems] = useState<ProductWithPrices[]>([]);
   const [isLoading, setIsLoading] = useState(false); // Added for backend call
 
-  // Mock search logic remains local for speed, 
-  // but adding items stays the same
+
   const handleSearch = (query: string) => {
     // ... (keep your existing handleSearch logic)
     setCurrentItem(query);
@@ -60,11 +59,12 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
     const loadingToast = toast.loading("Bunny is checking store prices...");
 
     try {
-      const response = await fetch("http://localhost:8000/search-prices", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/manual-list`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          items: selectedItems.map(i => i.name) // Sending names to your Python script
+          items: selectedItems.map(i => i.name)
         }),
       });
 
@@ -167,11 +167,6 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
         disabled={selectedItems.length === 0 || isLoading}
         className="w-full h-16 text-lg font-black bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
       >
-        {isLoading ? (
-          <Loader2 className="size-6 animate-spin" />
-        ) : (
-          <Sparkles className="size-5 fill-white" />
-        )}
         {isLoading ? "Comparing Stores..." : "Find Cheapest Store"}
       </Button>
     </Card>
