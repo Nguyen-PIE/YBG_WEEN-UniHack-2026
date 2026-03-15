@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { BudgetPlanner } from '../components/BudgetPlanner';
 import { ManualListCreator } from '../components/ManualListCreator';
 import { ProductWithPrices } from '../data/mockData';
+import { RecipeResult } from '../utils/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Heart, Sparkles } from 'lucide-react';
+import { Heart, Sparkles, ChefHat, ShoppingCart, DollarSign } from 'lucide-react';
 import { saveList, generateId } from '../utils/storage';
 import { toast } from 'sonner';
 
@@ -35,11 +36,32 @@ const storeLogos = [
 ];
 
 export function Home() {
+  const [generatedRecipe, setGeneratedRecipe] = useState<RecipeResult | null>(null);
   const [generatedList, setGeneratedList] = useState<ProductWithPrices[]>([]);
   const [listName, setListName] = useState('');
 
+  const handleGenerateRecipe = (recipe: RecipeResult) => {
+    setGeneratedRecipe(recipe);
+  };
+
   const handleGenerateList = (items: ProductWithPrices[]) => {
     setGeneratedList(items);
+  };
+
+  const handleSaveRecipeList = () => {
+    if (!generatedRecipe || generatedRecipe.ingredients.length === 0) {
+      toast.error('No ingredients to save');
+      return;
+    }
+    const name = listName.trim() || `Recipe ${new Date().toLocaleDateString()}`;
+    saveList({
+      id: generateId(),
+      name,
+      items: generatedRecipe.ingredients.map((i) => i.id),
+      createdAt: new Date(),
+    });
+    toast.success(`Saved "${name}"`);
+    setListName('');
   };
 
   const handleSaveList = () => {
@@ -47,16 +69,13 @@ export function Home() {
       toast.error('No items to save');
       return;
     }
-
     const name = listName.trim() || `List ${new Date().toLocaleDateString()}`;
-    
     saveList({
       id: generateId(),
       name,
       items: generatedList.map((p) => p.id),
       createdAt: new Date(),
     });
-
     toast.success(`Saved "${name}"`);
     setListName('');
   };
@@ -89,21 +108,20 @@ export function Home() {
           </div>
           
         </div>
-        {/* Subtle decorative circle */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent/30 rounded-full blur-3xl" />
       </div>
 
-      {/* Main Search Tabs */}
+      {/* Main Tabs */}
       <Tabs defaultValue="budget" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8 h-16 bg-primary/5 border-4 border-primary rounded-full p-2">
-          <TabsTrigger 
-            value="budget" 
+          <TabsTrigger
+            value="budget"
             className="rounded-full text-lg font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
           >
             Budget Planner
           </TabsTrigger>
-          <TabsTrigger 
-            value="manual" 
+          <TabsTrigger
+            value="manual"
             className="rounded-full text-lg font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
           >
             Create List
@@ -111,7 +129,7 @@ export function Home() {
         </TabsList>
 
         <TabsContent value="budget">
-          <BudgetPlanner onGenerateList={handleGenerateList} />
+          <BudgetPlanner onGenerateRecipe={handleGenerateRecipe} />
         </TabsContent>
 
         <TabsContent value="manual">
@@ -119,7 +137,109 @@ export function Home() {
         </TabsContent>
       </Tabs>
 
-      {/* Generated List Display */}
+      {/* Generated Recipe Display */}
+      {generatedRecipe && (
+        <Card className="p-8 bg-white border-4 border-primary rounded-[2rem] shadow-[12px_12px_0px_0px_#5D82C1]">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+            <h3 className="text-3xl font-black text-primary flex items-center gap-2 italic">
+              <ChefHat className="size-8" />
+              Your Recipe
+            </h3>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <Input
+                type="text"
+                placeholder="Name this recipe..."
+                value={listName}
+                onChange={(e) => setListName(e.target.value)}
+                className="rounded-full border-4 border-primary font-bold h-12 bg-cream"
+              />
+              <Button
+                onClick={handleSaveRecipeList}
+                className="bg-secondary border-4 border-primary text-foreground rounded-full h-12 px-6 font-black shadow-[4px_4px_0px_0px_#5D82C1] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95 whitespace-nowrap"
+              >
+                <Heart className="size-5 mr-2 fill-current" />
+                SAVE IT!
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Recipe Markdown */}
+            <div className="bg-primary/5 rounded-2xl border-2 border-primary/20 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ChefHat className="size-5 text-primary" />
+                <span className="font-black text-primary uppercase text-xs tracking-widest">Recipe</span>
+              </div>
+              <div className="prose prose-sm max-w-none">
+                <RecipeMarkdown markdown={generatedRecipe.recipeMarkdown} />
+              </div>
+            </div>
+
+            {/* Ingredient Shopping List */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="size-5 text-primary" />
+                  <span className="font-black text-primary uppercase text-xs tracking-widest">
+                    Shopping List
+                    <span className="ml-2 text-[10px] bg-accent px-2 py-0.5 rounded-full border border-primary/20">
+                      {generatedRecipe.ingredients.length} ITEMS
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-primary font-black">
+                  <DollarSign className="size-4" />
+                  <span className="text-2xl italic tracking-tighter">
+                    {generatedRecipe.totalPrice.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {generatedRecipe.ingredients.map((ing) => (
+                  <div
+                    key={ing.id}
+                    className="flex items-center justify-between p-3 bg-background border-2 border-primary/20 rounded-xl hover:border-primary transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="size-6 min-w-6 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs flex items-center justify-center font-black">
+                        {ing.qty}
+                      </span>
+                      <div>
+                        <p className="font-black text-sm text-foreground uppercase tracking-tight leading-tight">
+                          {ing.name}
+                        </p>
+                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">
+                          {ing.store}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-black text-primary">
+                        ${ing.totalPrice.toFixed(2)}
+                      </p>
+                      <p className="text-[10px] text-foreground/40 font-bold">
+                        ${ing.unitPrice.toFixed(2)} ea
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total row */}
+              <div className="flex items-center justify-between p-4 bg-primary/10 border-2 border-primary rounded-xl mt-4">
+                <span className="font-black text-primary uppercase text-sm tracking-widest">Total</span>
+                <span className="font-black text-primary text-2xl italic tracking-tighter">
+                  ${generatedRecipe.totalPrice.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Manual List Display */}
       {generatedList.length > 0 && (
         <Card className="p-8 bg-white border-4 border-primary rounded-[2rem] shadow-[12px_12px_0px_0px_#5D82C1]">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -137,8 +257,8 @@ export function Home() {
                 onChange={(e) => setListName(e.target.value)}
                 className="rounded-full border-4 border-primary font-bold h-12 bg-cream"
               />
-              <Button 
-                onClick={handleSaveList} 
+              <Button
+                onClick={handleSaveList}
                 className="bg-secondary border-4 border-primary text-foreground rounded-full h-12 px-6 font-black shadow-[4px_4px_0px_0px_#5D82C1] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95"
               >
                 <Heart className="size-5 mr-2 fill-current" />
@@ -174,10 +294,9 @@ export function Home() {
                     </h4>
                     <Sparkles className="size-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">
-                    {product.unit || `Qty: ${product.qty || 1}`}
-                  </p>
-                  
+                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">{product.unit}</p>
+
+
                   <div className="mt-auto flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/30">
                       {displayStore}
@@ -194,4 +313,74 @@ export function Home() {
       )}
     </div>
   );
+}
+
+// ─── Simple markdown renderer ─────────────────────────────────────────────────
+
+function RecipeMarkdown({ markdown }: { markdown: string }) {
+  const lines = markdown.split('\n');
+
+  return (
+    <div className="space-y-2 text-sm text-foreground">
+      {lines.map((line, i) => {
+        if (line.startsWith('# ')) {
+          return (
+            <h2 key={i} className="text-xl font-black text-primary uppercase tracking-tighter mt-2 mb-3">
+              {line.slice(2)}
+            </h2>
+          );
+        }
+        if (line.startsWith('## ')) {
+          return (
+            <h3 key={i} className="text-base font-black text-primary uppercase tracking-widest mt-4 mb-2">
+              {line.slice(3)}
+            </h3>
+          );
+        }
+        if (line.startsWith('### ')) {
+          return (
+            <h4 key={i} className="text-sm font-black text-primary/80 uppercase tracking-wider mt-3 mb-1">
+              {line.slice(4)}
+            </h4>
+          );
+        }
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          return (
+            <div key={i} className="flex gap-2 items-start">
+              <span className="text-primary font-black mt-0.5">•</span>
+              <span className="text-foreground/80 leading-relaxed">{renderInline(line.slice(2))}</span>
+            </div>
+          );
+        }
+        const numberedMatch = line.match(/^(\d+)\.\s(.+)/);
+        if (numberedMatch) {
+          return (
+            <div key={i} className="flex gap-3 items-start">
+              <span className="size-5 min-w-5 rounded-full bg-primary text-white text-[10px] flex items-center justify-center font-black mt-0.5">
+                {numberedMatch[1]}
+              </span>
+              <span className="text-foreground/80 leading-relaxed">{renderInline(numberedMatch[2])}</span>
+            </div>
+          );
+        }
+        if (line.trim() === '') return <div key={i} className="h-1" />;
+        return (
+          <p key={i} className="text-foreground/80 leading-relaxed">
+            {renderInline(line)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+function renderInline(text: string): React.ReactNode {
+  // Bold: **text**
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-black text-foreground">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
 }

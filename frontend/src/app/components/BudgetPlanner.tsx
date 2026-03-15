@@ -1,44 +1,59 @@
 import { useState } from 'react';
-import { ProductWithPrices } from '../data/mockData';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
-import { DollarSign, Users, Utensils, Loader2 } from 'lucide-react';
+import { DollarSign, Users, Utensils, Loader2, Clock, ChefHat } from 'lucide-react';
 import { toast } from 'sonner';
+import { generateRecipe, RecipeResult } from '../utils/api';
 
 interface BudgetPlannerProps {
-  onGenerateList: (items: ProductWithPrices[]) => void;
+  onGenerateRecipe: (recipe: RecipeResult) => void;
 }
 
-export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
+const MEAL_TYPE_OPTIONS = [
+  { value: 'any', label: 'Any' },
+  { value: 'breakfast', label: 'Breakfast' },
+  { value: 'lunch', label: 'Lunch' },
+  { value: 'dinner', label: 'Dinner' },
+];
+
+const DURATION_OPTIONS = [
+  { value: 'any', label: 'Any' },
+  { value: '5', label: '5 min' },
+  { value: '10', label: '10 min' },
+  { value: '15', label: '15 min' },
+  { value: '30', label: '30 min' },
+  { value: '1hr+', label: '1hr+' },
+];
+
+export function BudgetPlanner({ onGenerateRecipe }: BudgetPlannerProps) {
   const [budget, setBudget] = useState(20);
   const [people, setPeople] = useState(2);
-  const [meals, setMeals] = useState(1);
+  const [mealType, setMealType] = useState('any');
+  const [duration, setDuration] = useState('any');
   const [isLoading, setIsLoading] = useState(false);
 
   const generateGroceryList = async () => {
     setIsLoading(true);
-    const loadingToast = toast.loading("Bunny is crunching the numbers...");
+    const loadingToast = toast.loading("Bunny is cooking up your recipe...");
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const response = await fetch(`${API_URL}/generate-recipe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          budget: budget,
-          servings: people,
-          target_calories: Math.round(2000 / meals) 
-        })
-      });
-
-      if (!response.ok) throw new Error("Backend failed");
-      const data = await response.json();
-      onGenerateList(data.ingredientsToBuy);
-      toast.success(`Generated list via Python Backend!`, { id: loadingToast });
+      const recipe = await generateRecipe(
+        budget,
+        people,
+        500,
+        undefined,
+        mealType === 'any' ? undefined : mealType,
+        duration === 'any' ? undefined : duration,
+      );
+      onGenerateRecipe(recipe);
+      toast.success("Recipe generated!", { id: loadingToast });
     } catch (error) {
       console.error(error);
-      toast.error("The bunny tripped! Check your connection.", { id: loadingToast });
+      toast.error(
+        error instanceof Error ? error.message : "The bunny tripped! Check your connection.",
+        { id: loadingToast }
+      );
     } finally {
       setIsLoading(false);
     }
@@ -55,6 +70,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
       </div>
 
       <div className="space-y-16 max-w-2xl mx-auto">
+        {/* Budget Slider */}
         <div className="space-y-6">
           <div className="flex justify-between items-end px-2">
             <Label className="flex items-center gap-2 font-black text-primary uppercase text-xs tracking-widest">
@@ -76,6 +92,7 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
           />
         </div>
 
+        {/* People Slider */}
         <div className="space-y-6">
           <div className="flex justify-between items-end px-2">
             <Label className="flex items-center gap-2 font-black text-primary uppercase text-xs tracking-widest">
@@ -97,30 +114,81 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
           />
         </div>
 
-        <div className="space-y-6">
-          <div className="flex justify-between items-end px-2">
-            <Label className="flex items-center gap-2 font-black text-primary uppercase text-xs tracking-widest">
-              <div className="bg-muted p-1.5 rounded-lg border-2 border-primary shadow-[2px_2px_0px_0px_rgba(93,130,193,1)]">
-                <Utensils className="size-4 text-primary" />
-              </div>
-              Meals
-            </Label>
-            <span className="text-4xl font-black text-primary italic tracking-tighter">
-              {meals} <span className="text-sm not-italic ml-1">PER DAY</span>
-            </span>
+        {/* Meal Type Selector */}
+        <div className="space-y-4">
+          <Label className="flex items-center gap-2 font-black text-primary uppercase text-xs tracking-widest px-2">
+            <div className="bg-muted p-1.5 rounded-lg border-2 border-primary shadow-[2px_2px_0px_0px_rgba(93,130,193,1)]">
+              <Utensils className="size-4 text-primary" />
+            </div>
+            Meal Type
+          </Label>
+          <div className="flex gap-2 flex-wrap px-2">
+            {MEAL_TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setMealType(opt.value)}
+                className={`
+                  px-5 py-2.5 rounded-full border-2 font-black text-xs uppercase tracking-wider transition-all
+                  ${mealType === opt.value
+                    ? 'bg-primary text-white border-primary shadow-[3px_3px_0px_0px_rgba(93,130,193,0.5)]'
+                    : 'bg-background text-primary border-primary/30 hover:border-primary hover:shadow-[2px_2px_0px_0px_rgba(93,130,193,0.3)]'
+                  }
+                `}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
-          <Slider
-            value={[meals]}
-            onValueChange={(val) => setMeals(val[0])}
-            max={6}
-            step={1}
-            className="cursor-pointer"
-          />
         </div>
+
+        {/* Duration Selector */}
+        <div className="space-y-4">
+          <Label className="flex items-center gap-2 font-black text-primary uppercase text-xs tracking-widest px-2">
+            <div className="bg-accent p-1.5 rounded-lg border-2 border-primary shadow-[2px_2px_0px_0px_rgba(93,130,193,1)]">
+              <Clock className="size-4 text-primary" />
+            </div>
+            Duration
+          </Label>
+          <div className="flex gap-2 flex-wrap px-2">
+            {DURATION_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setDuration(opt.value)}
+                className={`
+                  px-5 py-2.5 rounded-full border-2 font-black text-xs uppercase tracking-wider transition-all
+                  ${duration === opt.value
+                    ? 'bg-primary text-white border-primary shadow-[3px_3px_0px_0px_rgba(93,130,193,0.5)]'
+                    : 'bg-background text-primary border-primary/30 hover:border-primary hover:shadow-[2px_2px_0px_0px_rgba(93,130,193,0.3)]'
+                  }
+                `}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active settings summary */}
+        {(mealType !== 'any' || duration !== 'any') && (
+          <div className="px-2 flex gap-2 flex-wrap">
+            {mealType !== 'any' && (
+              <span className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                <ChefHat className="size-3" />
+                {MEAL_TYPE_OPTIONS.find(o => o.value === mealType)?.label}
+              </span>
+            )}
+            {duration !== 'any' && (
+              <span className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                <Clock className="size-3" />
+                {DURATION_OPTIONS.find(o => o.value === duration)?.label}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      <Button 
-        onClick={generateGroceryList} 
+      <Button
+        onClick={generateGroceryList}
         disabled={isLoading}
         className="w-full mt-16 h-20 text-2xl font-black bg-secondary border-4 border-primary text-foreground rounded-full shadow-[10px_10px_0px_0px_#5D82C1] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all active:scale-[0.95] uppercase tracking-widest"
       >

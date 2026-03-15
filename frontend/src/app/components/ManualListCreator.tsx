@@ -53,15 +53,16 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
     setIsLoading(true);
     const loadingToast = toast.loading("Bunny is checking store prices...");
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const response = await fetch(`${API_URL}/manual-list`, {
+      const response = await fetch("/api/manual-list", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: selectedItems.map(i => i.name) }),
       });
-      if (!response.ok) throw new Error("Backend failed");
       const data = await response.json();
-      onCreateList(data.optimized_items || selectedItems);
+      if (!response.ok) {
+        throw new Error(data?.error || "Server request failed");
+      }
+      onCreateList(data.items);
       toast.success(`Found the best deals! 🐰✨`, { id: loadingToast });
     } catch (error) {
       toast.error("Couldn't reach the burrow!", { id: loadingToast });

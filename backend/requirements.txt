@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-requests
-openai
-python-dotenv
-pydantic
