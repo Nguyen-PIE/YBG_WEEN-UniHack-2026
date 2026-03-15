@@ -33,7 +33,7 @@ const generateGroceryList = async () => {
     try {
       const API_URL = (import.meta as any).env.VITE_API_URL || "http://localhost:8000";
 
-        const response = await fetch(`${API_URL}/generate-recipe`, {        
+      const response = await fetch(`${API_URL}/generate-recipe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,8 +49,7 @@ const generateGroceryList = async () => {
 
       const data = await response.json();
       
-      // Map to the correct key returned by your Python OpenAI prompt
-      onGenerateList(data.ingredientsToBuy);
+      onGenerateList(data.ingredientsToBuy || []);
       
       toast.success(`Generated list via Python Backend!`, { id: loadingToast });
     } catch (error) {
