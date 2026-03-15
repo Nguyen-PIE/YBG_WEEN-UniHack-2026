@@ -61,22 +61,25 @@ const generateGroceryList = async () => {
     }
   };
 
-  return (
-    <Card className="p-8 bg-white border-2 border-slate-200 rounded-3xl shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2 font-display">
-          <Sparkles className="size-6 text-pink-500 fill-pink-500" />
-          Budget Magic
+return (
+    <Card className="p-8 bg-background border-4 border-primary rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(93,130,193,0.2)]">
+      <div className="mb-8">
+        <h2 className="text-3xl font-black text-foreground flex items-center gap-2 font-display italic tracking-tight">
+          <Sparkles className="size-7 text-secondary fill-secondary" />
+          Budget Calculator
         </h2>
-        <p className="text-slate-500 font-medium">
-          Input your constraints and let the bunny find your meals.
+        <p className="text-foreground/70 font-bold uppercase text-xs tracking-widest mt-1">
+          Input your constraints & let our bunny find your meals
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
+        {/* Budget Input */}
         <div className="space-y-2">
-          <Label htmlFor="budget" className="flex items-center gap-2 font-bold text-slate-700">
-            <DollarSign className="size-4 text-emerald-600" />
+          <Label htmlFor="budget" className="flex items-center gap-2 font-black text-foreground uppercase text-[10px] tracking-tighter">
+            <div className="bg-accent p-1 rounded-md border-2 border-primary">
+               <DollarSign className="size-3 text-primary" />
+            </div>
             Budget
           </Label>
           <Input
@@ -86,13 +89,16 @@ const generateGroceryList = async () => {
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
             disabled={isLoading}
-            className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
+            className="h-12 border-4 border-primary bg-white rounded-2xl focus:ring-0 focus:bg-accent/20 transition-all font-bold text-lg"
           />
         </div>
 
+        {/* People Input */}
         <div className="space-y-2">
-          <Label htmlFor="people" className="flex items-center gap-2 font-bold text-slate-700">
-            <Users className="size-4 text-blue-600" />
+          <Label htmlFor="people" className="flex items-center gap-2 font-black text-foreground uppercase text-[10px] tracking-tighter">
+             <div className="bg-secondary p-1 rounded-md border-2 border-primary">
+                <Users className="size-3 text-primary" />
+             </div>
             People
           </Label>
           <Input
@@ -102,13 +108,16 @@ const generateGroceryList = async () => {
             value={people}
             onChange={(e) => setPeople(e.target.value)}
             disabled={isLoading}
-            className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
+            className="h-12 border-4 border-primary bg-white rounded-2xl focus:ring-0 focus:bg-accent/20 transition-all font-bold text-lg"
           />
         </div>
 
+        {/* Meals Input */}
         <div className="space-y-2">
-          <Label htmlFor="meals" className="flex items-center gap-2 font-bold text-slate-700">
-            <Utensils className="size-4 text-orange-600" />
+          <Label htmlFor="meals" className="flex items-center gap-2 font-black text-foreground uppercase text-[10px] tracking-tighter">
+             <div className="bg-njBlue/20 p-1 rounded-md border-2 border-primary">
+                <Utensils className="size-3 text-primary" />
+             </div>
             Meals
           </Label>
           <Input
@@ -118,7 +127,7 @@ const generateGroceryList = async () => {
             value={meals}
             onChange={(e) => setMeals(e.target.value)}
             disabled={isLoading}
-            className="h-12 border-2 border-slate-100 bg-slate-50 rounded-xl focus:border-pink-500 focus:ring-0 transition-colors"
+            className="h-12 border-4 border-primary bg-white rounded-2xl focus:ring-0 focus:bg-accent/20 transition-all font-bold text-lg"
           />
         </div>
       </div>
@@ -126,12 +135,14 @@ const generateGroceryList = async () => {
       <Button 
         onClick={generateGroceryList} 
         disabled={isLoading}
-        className="w-full mt-8 h-14 text-lg font-bold bg-pink-600 hover:bg-pink-700 text-white rounded-2xl shadow-md transition-all active:scale-[0.98]"
+        className="w-full mt-10 h-16 text-xl font-black bg-secondary border-4 border-primary text-foreground rounded-full shadow-[6px_6px_0px_0px_#5D82C1] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all active:scale-[0.95] uppercase tracking-tighter"
       >
         {isLoading ? (
-          <Loader2 className="size-5 animate-spin mr-2" />
-        ) : null}
-        {isLoading ? "Crunching Numbers..." : "Generate My Grocery List"}
+          <Loader2 className="size-6 animate-spin mr-3" />
+        ) : (
+          <Sparkles className="size-5 mr-2 fill-current" />
+        )}
+        {isLoading ? "Crunching..." : "Generate My Grocery List"}
       </Button>
     </Card>
   );
