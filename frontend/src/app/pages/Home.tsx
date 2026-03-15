@@ -10,6 +10,33 @@ import { Heart, Sparkles } from 'lucide-react';
 import { saveList, generateId } from '../utils/storage';
 import { toast } from 'sonner';
 
+// Carousel Imports
+import LogoLoop from '../components/LogoLoop'; 
+
+// REPLACED REACT ICONS WITH CDN IMAGES AND FIXED SIZING
+const storeLogos = [
+  { 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/Woolworths_Ltd._logo_(2022).svg" alt="Woolworths" className="h-8 w-24 object-contain" />, 
+    title: "Woolies", 
+    href: "#" 
+  },
+  { 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/aldi_logo.png" alt="Aldi" className="h-8 w-24 object-contain" />, 
+    title: "Aldi", 
+    href: "#" 
+  },
+  { 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/coles_logo.jpg" alt="Coles" className="h-8 w-24 object-contain" />, 
+    title: "Coles", 
+    href: "#" 
+  },
+  { 
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/IGA_logo.svg" alt="IGA" className="h-8 w-24 object-contain" />, 
+    title: "IGA", 
+    href: "#" 
+  },
+];
+
 export function Home() {
   const [generatedList, setGeneratedList] = useState<ProductWithPrices[]>([]);
   const [listName, setListName] = useState('');
@@ -39,21 +66,38 @@ export function Home() {
 
   return (
     <div className="space-y-10 pb-20">
-      {/* Hero Section - NewJeans Denim Look */}
+      {/* Hero Section */}
       <div className="text-primary py-12 px-4 text-center">
         <div className="relative z-10">
           <h1 className="text-5xl font-black mb-4 italic tracking-tighter uppercase">
             Make Every <span className="text-primary">Dollar</span> Count
           </h1>
-          <p className="text-lg font-black uppercase tracking-[0.2em] opacity-80">
+          <p className="text-lg font-black uppercase tracking-[0.2em] opacity-80 mb-8">
             Your friendly Bunny Buddy helping you find the best grocery deals!
           </p>
+          
+          {/* CAROUSEL INSERTED HERE */}
+          <div className="max-w-xl mx-auto h-[60px] relative overflow-hidden">
+            <LogoLoop
+              logos={storeLogos}
+              speed={100}
+              direction="left"
+              logoHeight={32}
+              gap={48}
+              hoverSpeed={0}
+              scaleOnHover
+              fadeOut
+              fadeOutColor="#f8fafc" // Adjust this hex to match your background color
+              ariaLabel="Supermarket partners"
+            />
+          </div>
+          
         </div>
-        {/* Subtle decorative circle for that Y2K look */}
+        {/* Subtle decorative circle */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent/30 rounded-full blur-3xl" />
       </div>
 
-      {/* Main Search Tabs - Stationery Look */}
+      {/* Main Search Tabs */}
       <Tabs defaultValue="budget" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8 h-16 bg-primary/5 border-4 border-primary rounded-full p-2">
           <TabsTrigger 
@@ -79,7 +123,7 @@ export function Home() {
         </TabsContent>
       </Tabs>
 
-      {/* Generated List Display - "Scrapbook" Style */}
+      {/* Generated List Display */}
       {generatedList.length > 0 && (
         <Card className="p-8 bg-white border-4 border-primary rounded-[2rem] shadow-[12px_12px_0px_0px_#5D82C1]">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -108,30 +152,42 @@ export function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {generatedList.map((product) => {
-              const cheapestPrice = Math.min(
-                ...product.prices.map((p) => p.salePrice || p.price)
-              );
-              const cheapestStore = product.prices.find(
-                (p) => (p.salePrice || p.price) === cheapestPrice
-              );
+            {generatedList.map((product: any) => {
+              // SAFE MAPPING LOGIC IMPLEMENTED HERE
+              let displayPrice = 0;
+              let displayStore = "Unknown Store";
+
+              if (product.prices && Array.isArray(product.prices)) {
+                displayPrice = Math.min(
+                  ...product.prices.map((p: any) => p.salePrice || p.price)
+                );
+                const cheapestStore = product.prices.find(
+                  (p: any) => (p.salePrice || p.price) === displayPrice
+                );
+                displayStore = cheapestStore?.storeName || "Unknown Store";
+              } else {
+                displayPrice = product.price || 0;
+                displayStore = product.store || "Unknown Store";
+              }
 
               return (
-                <Card key={product.id} className="p-5 bg-background border-4 border-primary/20 rounded-2xl hover:border-primary hover:shadow-[4px_4px_0px_0px_#5D82C1] transition-all group">
+                <Card key={product.id || Math.random()} className="p-5 bg-background border-4 border-primary/20 rounded-2xl hover:border-primary hover:shadow-[4px_4px_0px_0px_#5D82C1] transition-all group">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-black text-foreground text-lg leading-tight uppercase tracking-tighter">
                       {product.name}
                     </h4>
                     <Sparkles className="size-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">{product.unit}</p>
+                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">
+                    {product.unit || `Qty: ${product.qty || 1}`}
+                  </p>
                   
                   <div className="mt-auto flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/30">
-                      {cheapestStore?.storeName}
+                      {displayStore}
                     </span>
                     <span className="font-black text-2xl text-primary tracking-tighter">
-                      ${cheapestPrice.toFixed(2)}
+                      ${Number(displayPrice).toFixed(2)}
                     </span>
                   </div>
                 </Card>
