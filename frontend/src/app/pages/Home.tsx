@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Save, Heart } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 import { saveList, generateId } from '../utils/storage';
 import { toast } from 'sonner';
 
@@ -38,24 +38,34 @@ export function Home() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Hero Section */}
-      <Card className="bg-purple-600 text-white p-10 rounded-3xl border-none shadow-md">
-        <h1 className="text-4xl font-black mb-3 text-shadow-sm">
-          Make Every Dollar Count!
-        </h1>
-        <p className="text-xl opacity-95 font-medium">
-          Your friendly Bunny Buddy helping you find the best grocery deals
-        </p>
-      </Card>
+    <div className="space-y-10 pb-20">
+      {/* Hero Section - NewJeans Denim Look */}
+      <div className="text-primary py-12 px-4 text-center">
+        <div className="relative z-10">
+          <h1 className="text-5xl font-black mb-4 italic tracking-tighter uppercase">
+            Make Every <span className="text-primary">Dollar</span> Count
+          </h1>
+          <p className="text-lg font-black uppercase tracking-[0.2em] opacity-80">
+            Your friendly Bunny Buddy helping you find the best grocery deals!
+          </p>
+        </div>
+        {/* Subtle decorative circle for that Y2K look */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent/30 rounded-full blur-3xl" />
+      </div>
 
-      {/* Main Search Tabs */}
+      {/* Main Search Tabs - Stationery Look */}
       <Tabs defaultValue="budget" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 h-14 bg-pink-100 rounded-2xl border-2 border-pink-300">
-          <TabsTrigger value="budget" className="rounded-xl text-base font-semibold data-[state=active]:bg-white data-[state=active]:shadow-md">
+        <TabsList className="grid w-full grid-cols-2 mb-8 h-16 bg-primary/5 border-4 border-primary rounded-full p-2">
+          <TabsTrigger 
+            value="budget" 
+            className="rounded-full text-lg font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+          >
             Budget Planner
           </TabsTrigger>
-          <TabsTrigger value="manual" className="rounded-xl text-base font-semibold data-[state=active]:bg-white data-[state=active]:shadow-md">
+          <TabsTrigger 
+            value="manual" 
+            className="rounded-full text-lg font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+          >
             Create List
           </TabsTrigger>
         </TabsList>
@@ -69,29 +79,35 @@ export function Home() {
         </TabsContent>
       </Tabs>
 
-      {/* Generated List Display */}
+      {/* Generated List Display - "Scrapbook" Style */}
       {generatedList.length > 0 && (
-        <Card className="p-6 bg-emerald-50 border-2 border-green-300 rounded-3xl shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              Your Shopping List ({generatedList.length} items)
+        <Card className="p-8 bg-white border-4 border-primary rounded-[2rem] shadow-[12px_12px_0px_0px_#5D82C1]">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+            <h3 className="text-3xl font-black text-primary flex items-center gap-2 italic">
+              Your Shopping List
+              <span className="text-sm not-italic bg-accent px-3 py-1 rounded-full border-2 border-primary text-foreground ml-2">
+                {generatedList.length} ITEMS
+              </span>
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 w-full md:w-auto">
               <Input
                 type="text"
-                placeholder="Give it a name..."
+                placeholder="Name your haul..."
                 value={listName}
                 onChange={(e) => setListName(e.target.value)}
-                className="w-48 rounded-xl border-2 border-green-300"
+                className="rounded-full border-4 border-primary font-bold h-12 bg-cream"
               />
-              <Button onClick={handleSaveList} className="bg-green-600 hover:bg-green-700 rounded-xl shadow-sm">
-                <Heart className="size-4 mr-2" />
-                Save It!
+              <Button 
+                onClick={handleSaveList} 
+                className="bg-secondary border-4 border-primary text-foreground rounded-full h-12 px-6 font-black shadow-[4px_4px_0px_0px_#5D82C1] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95"
+              >
+                <Heart className="size-5 mr-2 fill-current" />
+                SAVE IT!
               </Button>
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {generatedList.map((product) => {
               const cheapestPrice = Math.min(
                 ...product.prices.map((p) => p.salePrice || p.price)
@@ -101,14 +117,20 @@ export function Home() {
               );
 
               return (
-                <Card key={product.id} className="p-4 bg-white border-2 border-green-200 rounded-2xl hover:shadow-md transition-shadow">
-                  <h4 className="font-bold text-gray-800">{product.name}</h4>
-                  <p className="text-sm text-gray-600 mb-2">{product.unit}</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">
+                <Card key={product.id} className="p-5 bg-background border-4 border-primary/20 rounded-2xl hover:border-primary hover:shadow-[4px_4px_0px_0px_#5D82C1] transition-all group">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-black text-foreground text-lg leading-tight uppercase tracking-tighter">
+                      {product.name}
+                    </h4>
+                    <Sparkles className="size-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">{product.unit}</p>
+                  
+                  <div className="mt-auto flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/30">
                       {cheapestStore?.storeName}
                     </span>
-                    <span className="font-bold text-xl text-green-600">
+                    <span className="font-black text-2xl text-primary tracking-tighter">
                       ${cheapestPrice.toFixed(2)}
                     </span>
                   </div>
