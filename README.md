@@ -1,2 +1,4 @@
 # YBG_WEEN-UniHack-2026
 UniHack 48 Hour Hackathon. 5 Builders. 1 Dream. Fighting food security and cost of living crisis on the local level. 
+
+https://budget-bunny-uni-hack-2026.vercel.app/
