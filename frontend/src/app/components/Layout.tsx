@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router';
-import { ShoppingCart, Tag, ListChecks } from 'lucide-react';
+import { ShoppingCart, Tag, ListChecks, ChefHat } from 'lucide-react';
 export const BUNNY_LOGO = "https://storage.googleapis.com/budget-bunny-assets/bunny.png";
 
 export function Layout() {
@@ -7,7 +7,8 @@ export function Layout() {
   
   const navItems = [
     { path: '/', label: 'Search', icon: ShoppingCart },
-    { path: '/specials', label: 'Weekly Specials', icon: Tag },
+    { path: '/specials', label: 'Price Comparison', icon: Tag },
+    { path: '/recipes', label: 'Recipes', icon: ChefHat },
     { path: '/saved', label: 'Saved Lists', icon: ListChecks },
   ];
   

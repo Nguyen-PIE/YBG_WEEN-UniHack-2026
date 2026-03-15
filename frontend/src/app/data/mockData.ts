@@ -27,232 +27,69 @@ export interface Store {
   location: string;
 }
 
+export interface ShoppingList {
+  id: string;
+  name: string;
+  items: string[];
+  createdAt: Date;
+  budget?: number;
+}
+
 export const stores: Store[] = [
-  { id: 'walmart', name: 'Walmart', type: 'supermarket', location: 'Main St' },
-  { id: 'target', name: 'Target', type: 'supermarket', location: 'Oak Ave' },
-  { id: 'kroger', name: 'Kroger', type: 'supermarket', location: 'Elm St' },
-  { id: 'aldi', name: 'ALDI', type: 'supermarket', location: 'Pine Rd' },
-  { id: 'pantry1', name: 'Community Food Pantry', type: 'pantry', location: 'Church St' },
-  { id: 'pantry2', name: 'Hope Kitchen', type: 'pantry', location: 'Highland Ave' },
+  { id: 'aldi', name: 'Aldi', type: 'supermarket', location: 'North' },
+  { id: 'coles', name: 'Coles', type: 'supermarket', location: 'Central' },
+  { id: 'woolworths', name: 'Woolworths', type: 'supermarket', location: 'South' },
+  { id: 'iga', name: 'IGA', type: 'supermarket', location: 'East' },
+  { id: 'pantry1', name: 'Community Food Pantry', type: 'pantry', location: 'West' },
 ];
 
 export const products: ProductWithPrices[] = [
   {
-    id: 'rice',
-    name: 'White Rice',
-    category: 'Grains',
-    unit: '5 kg bag',
-    calories: 2000,
-    servings: 20,
+    id: 'apple',
+    name: 'Apples',
+    category: 'Fruit',
+    unit: '1 kg bag',
     prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 4.99, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 5.49, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 5.99, onSale: true, salePrice: 4.49, weeklySpecial: true },
-      { storeId: 'aldi', storeName: 'ALDI', price: 3.99, onSale: false },
+      { storeId: 'aldi', storeName: 'Aldi', price: 3.49, onSale: false },
+      { storeId: 'coles', storeName: 'Coles', price: 3.99, onSale: true, salePrice: 3.2, weeklySpecial: true },
+      { storeId: 'woolworths', storeName: 'Woolworths', price: 4.1, onSale: false },
+      { storeId: 'iga', storeName: 'IGA', price: 4.29, onSale: false },
     ],
   },
   {
-    id: 'beans',
-    name: 'Pinto Beans',
-    category: 'Proteins',
-    unit: '2 kg bag',
-    calories: 1200,
-    servings: 12,
+    id: 'banana',
+    name: 'Bananas',
+    category: 'Fruit',
+    unit: '1 kg',
     prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 2.49, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 2.79, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 2.99, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 1.99, onSale: false },
-    ],
-  },
-  {
-    id: 'pasta',
-    name: 'Spaghetti',
-    category: 'Grains',
-    unit: '1 kg box',
-    calories: 1600,
-    servings: 8,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 1.29, onSale: true, salePrice: 0.99, weeklySpecial: true },
-      { storeId: 'target', storeName: 'Target', price: 1.49, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 1.39, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 0.89, onSale: false },
-    ],
-  },
-  {
-    id: 'eggs',
-    name: 'Large Eggs',
-    category: 'Proteins',
-    unit: '12 count',
-    calories: 840,
-    servings: 12,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 3.99, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 4.29, onSale: true, salePrice: 3.49, weeklySpecial: true },
-      { storeId: 'kroger', storeName: 'Kroger', price: 4.49, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 2.99, onSale: false },
-    ],
-  },
-  {
-    id: 'bread',
-    name: 'Whole Wheat Bread',
-    category: 'Grains',
-    unit: '20 ml loaf',
-    calories: 1400,
-    servings: 20,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 2.49, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 2.79, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 2.99, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 1.79, onSale: false },
+      { storeId: 'aldi', storeName: 'Aldi', price: 2.99, onSale: false },
+      { storeId: 'coles', storeName: 'Coles', price: 3.2, onSale: false },
+      { storeId: 'woolworths', storeName: 'Woolworths', price: 3.35, onSale: false },
+      { storeId: 'iga', storeName: 'IGA', price: 3.49, onSale: true, salePrice: 3.19, weeklySpecial: true },
     ],
   },
   {
     id: 'milk',
-    name: 'Whole Milk',
+    name: 'Milk',
     category: 'Dairy',
-    unit: '1 gallon',
-    calories: 2400,
-    servings: 16,
+    unit: '2 L bottle',
     prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 3.79, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 3.99, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 4.29, onSale: true, salePrice: 3.49, weeklySpecial: true },
-      { storeId: 'aldi', storeName: 'ALDI', price: 3.29, onSale: false },
+      { storeId: 'aldi', storeName: 'Aldi', price: 3.29, onSale: false },
+      { storeId: 'coles', storeName: 'Coles', price: 3.6, onSale: true, salePrice: 3.3, weeklySpecial: true },
+      { storeId: 'woolworths', storeName: 'Woolworths', price: 3.59, onSale: false },
+      { storeId: 'iga', storeName: 'IGA', price: 3.79, onSale: false },
     ],
   },
   {
-    id: 'chicken',
-    name: 'Chicken Breast',
-    category: 'Proteins',
-    unit: '2 kg pack',
-    calories: 1000,
-    servings: 8,
+    id: 'bread',
+    name: 'Wholegrain Bread',
+    category: 'Bakery',
+    unit: '700 g loaf',
     prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 7.99, onSale: true, salePrice: 6.99, weeklySpecial: true },
-      { storeId: 'target', storeName: 'Target', price: 8.49, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 8.99, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 6.49, onSale: false },
-    ],
-  },
-  {
-    id: 'potatoes',
-    name: 'Russet Potatoes',
-    category: 'Vegetables',
-    unit: '5 kg bag',
-    calories: 1750,
-    servings: 15,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 3.49, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 3.99, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 4.29, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 2.99, onSale: false },
-    ],
-  },
-  {
-    id: 'carrots',
-    name: 'Baby Carrots',
-    category: 'Vegetables',
-    unit: '2 kg bag',
-    calories: 300,
-    servings: 10,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 2.29, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 2.49, onSale: true, salePrice: 1.99, weeklySpecial: true },
-      { storeId: 'kroger', storeName: 'Kroger', price: 2.79, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 1.79, onSale: false },
-    ],
-  },
-  {
-    id: 'cheese',
-    name: 'Cheddar Cheese',
-    category: 'Dairy',
-    unit: '8 ml block',
-    calories: 900,
-    servings: 8,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 3.99, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 4.29, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 4.49, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 2.99, onSale: false },
-    ],
-  },
-  {
-    id: 'oatmeal',
-    name: 'Rolled Oats',
-    category: 'Grains',
-    unit: '42 ml canister',
-    calories: 4200,
-    servings: 30,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 4.49, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 4.99, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 5.29, onSale: true, salePrice: 3.99, weeklySpecial: true },
-      { storeId: 'aldi', storeName: 'ALDI', price: 3.49, onSale: false },
-    ],
-  },
-  {
-    id: 'oil',
-    name: 'Vegetable Oil',
-    category: 'Cooking',
-    unit: '48 ml bottle',
-    calories: 12000,
-    servings: 96,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 5.99, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 6.49, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 6.99, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 4.99, onSale: false },
-    ],
-  },
-  {
-    id: 'tomatoes',
-    name: 'Canned Tomatoes',
-    category: 'Vegetables',
-    unit: '28 ml can',
-    calories: 200,
-    servings: 7,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 1.49, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 1.69, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 1.79, onSale: true, salePrice: 1.29, weeklySpecial: true },
-      { storeId: 'aldi', storeName: 'ALDI', price: 0.99, onSale: false },
-    ],
-  },
-  {
-    id: 'onions',
-    name: 'Yellow Onions',
-    category: 'Vegetables',
-    unit: '3 kg bag',
-    calories: 450,
-    servings: 10,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 2.49, onSale: false },
-      { storeId: 'target', storeName: 'Target', price: 2.79, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 2.99, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 1.99, onSale: false },
-    ],
-  },
-  {
-    id: 'peanutbutter',
-    name: 'Peanut Butter',
-    category: 'Proteins',
-    unit: '16 ml jar',
-    calories: 2800,
-    servings: 16,
-    prices: [
-      { storeId: 'walmart', storeName: 'Walmart', price: 3.49, onSale: true, salePrice: 2.99, weeklySpecial: true },
-      { storeId: 'target', storeName: 'Target', price: 3.79, onSale: false },
-      { storeId: 'kroger', storeName: 'Kroger', price: 3.99, onSale: false },
-      { storeId: 'aldi', storeName: 'ALDI', price: 2.49, onSale: false },
+      { storeId: 'aldi', storeName: 'Aldi', price: 2.59, onSale: false },
+      { storeId: 'coles', storeName: 'Coles', price: 2.89, onSale: false },
+      { storeId: 'woolworths', storeName: 'Woolworths', price: 2.99, onSale: true, salePrice: 2.5, weeklySpecial: true },
+      { storeId: 'iga', storeName: 'IGA', price: 3.19, onSale: false },
     ],
   },
 ];
-
-export interface ShoppingList {
-  id: string;
-  name: string;
-  items: string[]; // Product IDs
-  createdAt: Date;
-  budget?: number;
-}
