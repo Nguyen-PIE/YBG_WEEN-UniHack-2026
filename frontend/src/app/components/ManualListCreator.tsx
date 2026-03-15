@@ -60,7 +60,7 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const response = await fetch(`${API_URL}/manual-list`, {
+      const response = await fetch(`${API_URL}/search-prices`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
