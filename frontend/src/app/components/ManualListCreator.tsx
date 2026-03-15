@@ -15,7 +15,35 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
   const [selectedItems, setSelectedItems] = useState<ProductWithPrices[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ... (Keep your handleSearch, addItem, and removeItem logic exactly as is)
+  const handleSearch = (query: string) => {
+    // ... (keep your existing handleSearch logic)
+    setCurrentItem(query);
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    // (Filtering from mockData for the UI dropdown)
+    const results = (window as any).mockProducts?.filter((product: any) =>
+      product.name.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 8) || [];
+    setSearchResults(results);
+  };
+
+  const addItem = (product: ProductWithPrices) => {
+    if (!selectedItems.find(item => item.id === product.id)) {
+      setSelectedItems([...selectedItems, product]);
+      toast.success(`Added ${product.name}! 🎉`);
+      setCurrentItem('');
+      setSearchResults([]);
+    } else {
+      toast.error('Already in your list!');
+    }
+  };
+
+  const removeItem = (productId: string) => {
+    setSelectedItems(selectedItems.filter(item => item.id !== productId));
+    toast.success('Removed from list');
+  };
 
   const findCheapest = async () => {
     if (selectedItems.length === 0) {
@@ -25,7 +53,8 @@ export function ManualListCreator({ onCreateList }: ManualListCreatorProps) {
     setIsLoading(true);
     const loadingToast = toast.loading("Bunny is checking store prices...");
     try {
-      const response = await fetch("http://localhost:8000/search-prices", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/manual-list`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: selectedItems.map(i => i.name) }),

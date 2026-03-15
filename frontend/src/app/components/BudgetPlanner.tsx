@@ -48,7 +48,6 @@ export function BudgetPlanner({ onGenerateList }: BudgetPlannerProps) {
     <div className="p-8 bg-transparent">
       <div className="mb-12 text-center">
         <h2 className="text-5xl font-black text-primary font-display italic tracking-tighter uppercase">
-          Budget Calculator
         </h2>
         <p className="text-primary/60 font-black uppercase text-[10px] tracking-[0.3em] mt-3">
           Let our bunny curate your meals
