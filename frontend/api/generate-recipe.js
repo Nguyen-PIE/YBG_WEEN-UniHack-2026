@@ -12,6 +12,7 @@ loadEnv({ path: resolve(__dirname, "../.env.local") });
 
 const MAX_ELASTIC_RESULTS = 600;
 const MIN_SEMANTIC_RESULTS = 50;
+const MIN_QUERY_RESULTS = 12;
 const KNN_NUM_CANDIDATES = 1200;
 const MAX_ITEMS_FOR_LLM = 60;
 const MAX_ITEMS_PER_TERM = 6;
@@ -97,8 +98,8 @@ function classifyMacroGroup(item) {
   return "other";
 }
 
-function resolveCuisineStyle(input) {
-  if (!input || !input.trim()) return "Any";
+function resolveRecipeQuery(input) {
+  if (!input || !input.trim()) return null;
   return input.trim();
 }
 
@@ -116,6 +117,45 @@ function resolveTimeConstraint(input) {
   if (normalised in TIME_CONSTRAINT_MAP) return TIME_CONSTRAINT_MAP[normalised];
   const allowed = Object.keys(TIME_CONSTRAINT_MAP).filter((k) => k !== "any").join(", ");
   throw new Error(`Time constraint must be one of: ${allowed}.`);
+}
+
+function extractQueryTokens(query) {
+  if (!query) return [];
+  const tokens = normaliseText(query)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  const stopWords = new Set(["and", "or", "with", "without", "for", "the", "a", "an", "of", "to"]);
+  return tokens.filter((token) => !stopWords.has(token));
+}
+
+function scoreItemForQuery(item, tokens) {
+  if (tokens.length === 0) return 0;
+  const haystack = normaliseText([item.name, item.category, item.term].filter(Boolean).join(" "));
+  let score = 0;
+  for (const token of tokens) {
+    if (keywordInText(haystack, token)) score += 1;
+  }
+  return score;
+}
+
+function filterItemsByQuery(items, query) {
+  const tokens = extractQueryTokens(query);
+  if (tokens.length === 0) return items;
+
+  const scored = items
+    .map((item) => ({
+      item,
+      score: scoreItemForQuery(item, tokens),
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.item.price - b.item.price;
+    });
+
+  return scored.map((entry) => entry.item);
 }
 
 // ─── OpenAI ───────────────────────────────────────────────────────────────────
@@ -313,11 +353,10 @@ function selectItems(items) {
 
 // ─── Prompt ───────────────────────────────────────────────────────────────────
 
-function buildPrompt(budget, servings, targetCalories, cuisineStyle, mealType, timeConstraint, availableItems) {
-  const cuisineLine =
-    cuisineStyle === "Any"
-      ? "Cuisine style for this run: Any. Choose any style."
-      : `Cuisine style for this run: ${cuisineStyle}. Make the dish clearly match this style.`;
+function buildPrompt(budget, servings, targetCalories, recipeQuery, mealType, timeConstraint, availableItems) {
+  const queryLine = recipeQuery
+    ? `User request for this run: ${recipeQuery}. Make the dish clearly match this request.`
+    : "User request for this run: Any. Choose any style or ingredient focus.";
 
   const mealLine =
     mealType === "Any"
@@ -333,7 +372,7 @@ function buildPrompt(budget, servings, targetCalories, cuisineStyle, mealType, t
 You are an expert nutritionist helping families in a cost-of-living crisis.
 Task: Create a recipe that feeds ${servings} people.
 Make sure to factor in serving sizes for the ingredients.
-${cuisineLine}
+${queryLine}
 ${mealLine}
 ${timeLine}
 
@@ -345,6 +384,7 @@ Constraints:
 5. ACCURACY: Use only ids from the list. Do not return name, price, or store fields in the ingredient list.
 6. QTY: qty must be a positive whole number.
 7. All items in the recipe MUST BE FROM THE AVAILABLE ITEMS LIST.
+8. The recipe markdown must explicitly mention each chosen ingredient term or name.
 
 Available Items (JSON array):
 ${JSON.stringify(availableItems)}
@@ -383,7 +423,7 @@ function validateRecipe(recipe, availableItems, budget, allowOverBudget = false)
 
   const availableById = Object.fromEntries(availableItems.map((item) => [item.id, item]));
   let totalCost = 0;
-  const cleanedIngredients = [];
+  const ingredientMap = new Map();
 
   for (const item of recipe.ingredientIds) {
     if (typeof item !== "object" || item === null) {
@@ -409,8 +449,16 @@ function validateRecipe(recipe, availableItems, budget, allowOverBudget = false)
 
     const source = availableById[ingredientId];
     totalCost += source.price * qty;
-    cleanedIngredients.push({ id: source.id, qty, unitPrice: source.price });
+    const existing = ingredientMap.get(source.id);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      ingredientMap.set(source.id, { id: source.id, qty, unitPrice: source.price });
+    }
   }
+
+  const cleanedIngredients = Array.from(ingredientMap.values());
+  validateMarkdownIngredients(recipe.recipeMarkdown, cleanedIngredients, availableById);
 
   const overBudget = totalCost - budget;
   if (overBudget > BUDGET_TOLERANCE && !allowOverBudget) {
@@ -425,6 +473,24 @@ function validateRecipe(recipe, availableItems, budget, allowOverBudget = false)
     },
     totalCost,
   ];
+}
+
+function validateMarkdownIngredients(markdown, ingredients, availableById) {
+  const normalisedMarkdown = normaliseText(markdown);
+  if (!normalisedMarkdown) {
+    throw new Error("recipeMarkdown must be a non-empty string.");
+  }
+
+  for (const ingredient of ingredients) {
+    const source = availableById[ingredient.id];
+    const termTokens = extractQueryTokens(source.term || source.name);
+    if (termTokens.length === 0) continue;
+
+    const hasToken = termTokens.some((token) => keywordInText(normalisedMarkdown, token));
+    if (!hasToken) {
+      throw new Error(`recipeMarkdown must mention ingredient term: ${source.term || source.name}`);
+    }
+  }
 }
 
 // ─── Budget Adjustment ────────────────────────────────────────────────────────
@@ -548,18 +614,18 @@ export default async function handler(req, res) {
       ? requirePositiveNumber(body.targetCalories, "targetCalories")
       : 500;
 
-    const cuisineStyle = resolveCuisineStyle(body?.cuisineStyle);
+    const recipeQuery = resolveRecipeQuery(body?.cuisineStyle);
     const mealType = resolveMealType(body?.mealType);
     const timeConstraint = resolveTimeConstraint(body?.duration);
 
     log(`Firing up AI Chef — budget=$${budget} servings=${servings} cal=${targetCalories}`);
-    log(`Cuisine: ${cuisineStyle} | Meal: ${mealType} | Time: ${timeConstraint}`);
+    log(`Query: ${recipeQuery ?? "Any"} | Meal: ${mealType} | Time: ${timeConstraint}`);
 
     const openai = getOpenAIClient();
 
     // Build semantic query for KNN search
     const semanticParts = [];
-    if (cuisineStyle !== "Any") semanticParts.push(cuisineStyle);
+    if (recipeQuery) semanticParts.push(recipeQuery);
     if (mealType !== "Any") semanticParts.push(mealType);
     const semanticQuery = semanticParts.length > 0
       ? semanticParts.join(" ") + " meal"
@@ -586,6 +652,16 @@ export default async function handler(req, res) {
       log(`After fallback merge: ${affordableItems.length} items`);
     }
 
+    if (recipeQuery) {
+      const filteredItems = filterItemsByQuery(affordableItems, recipeQuery);
+      if (filteredItems.length >= MIN_QUERY_RESULTS) {
+        affordableItems = filteredItems;
+        log(`Filtered by query "${recipeQuery}" to ${affordableItems.length} items`);
+      } else {
+        log(`Query filter too narrow (${filteredItems.length} items). Keeping full list.`);
+      }
+    }
+
     const availableIngredients = selectItems(affordableItems);
 
     const macroCounts = { protein: 0, carb: 0, veg: 0, other: 0 };
@@ -600,7 +676,7 @@ export default async function handler(req, res) {
       budget,
       servings,
       targetCalories,
-      cuisineStyle,
+      recipeQuery,
       mealType,
       timeConstraint,
       availableIngredients
@@ -654,7 +730,7 @@ export default async function handler(req, res) {
           : "The previous response failed validation.";
 
         prompt =
-          buildPrompt(budget, servings, targetCalories, cuisineStyle, mealType, timeConstraint, availableIngredients) +
+          buildPrompt(budget, servings, targetCalories, recipeQuery, mealType, timeConstraint, availableIngredients) +
           `\n${retryNote}\nValidation error: ${exc.message}\nReturn a corrected JSON response using ONLY ids from the list.\n`;
       }
     }

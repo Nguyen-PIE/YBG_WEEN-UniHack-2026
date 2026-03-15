@@ -1,3 +1,7 @@
+import type { ProductWithPrices } from '../data/types';
+
+export type { ProductWithPrices };
+
 const API_BASE_URL = "/api";
 
 export interface RecipeIngredient {
@@ -25,23 +29,24 @@ export async function generateRecipe(
 ): Promise<RecipeResult> {
   const response = await fetch(`${API_BASE_URL}/generate-recipe`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      budget,
-      servings,
-      targetCalories,
-      cuisineStyle: cuisineStyle || undefined,
-      mealType: mealType || undefined,
-      duration: duration || undefined,
-    }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ budget, servings, targetCalories, cuisineStyle, mealType, duration }),
   });
-
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data?.error || "Failed to cook up a recipe");
-  }
-
+  if (!response.ok) throw new Error(data?.error || "Failed to cook up a recipe");
   return data as RecipeResult;
+}
+
+export async function searchProducts(
+  query: string,
+  size = 40,
+): Promise<ProductWithPrices[]> {
+  const response = await fetch(`${API_BASE_URL}/search-products`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, size }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error || "Search failed");
+  return data.products as ProductWithPrices[];
 }

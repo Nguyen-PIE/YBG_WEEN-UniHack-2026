@@ -1,43 +1,45 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { BudgetPlanner } from '../components/BudgetPlanner';
 import { ManualListCreator } from '../components/ManualListCreator';
-import { ProductWithPrices } from '../data/mockData';
+import { ProductWithPrices } from '../utils/api';
 import { RecipeResult } from '../utils/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Heart, Sparkles, ChefHat, ShoppingCart, DollarSign } from 'lucide-react';
-import { saveList, generateId } from '../utils/storage';
+import { Heart, Sparkles, ChefHat, ShoppingCart, DollarSign, ExternalLink } from 'lucide-react';
+import { saveList, saveRecipe, generateId } from '../utils/storage';
 import { toast } from 'sonner';
+import { RecipeMarkdown } from '../components/RecipeMarkdown';
 
-import LogoLoop from '../components/LogoLoop'; 
+import LogoLoop from '../components/LogoLoop';
 const storeLogos = [
-  { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/Woolworths_Ltd._logo_(2022).svg" alt="Woolworths" className="h-12 w-28 object-contain" />, 
-    title: "Woolies", 
-    href: "#" 
+  {
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/Woolworths_Ltd._logo_(2022).svg" alt="Woolworths" className="h-12 w-28 object-contain" />,
+    title: 'Woolies',
+    href: '#',
   },
-  { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/aldi_logo.png" alt="Aldi" className="h-12 w-28 object-contain" />, 
-    title: "Aldi", 
-    href: "#" 
+  {
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/aldi_logo.png" alt="Aldi" className="h-12 w-28 object-contain" />,
+    title: 'Aldi',
+    href: '#',
   },
-  { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/coles_logo.jpg" alt="Coles" className="h-12 w-28 object-contain" />, 
-    title: "Coles", 
-    href: "#" 
+  {
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/coles_logo.jpg" alt="Coles" className="h-12 w-28 object-contain" />,
+    title: 'Coles',
+    href: '#',
   },
-  { 
-    node: <img src="https://storage.googleapis.com/budget-bunny-assets/IGA_logo.svg" alt="IGA" className="h-12 w-28 object-contain" />, 
-    title: "IGA", 
-    href: "#" 
+  {
+    node: <img src="https://storage.googleapis.com/budget-bunny-assets/IGA_logo.svg" alt="IGA" className="h-12 w-28 object-contain" />,
+    title: 'IGA',
+    href: '#',
   },
 ];
 
 export function Home() {
   const [generatedRecipe, setGeneratedRecipe] = useState<RecipeResult | null>(null);
   const [generatedList, setGeneratedList] = useState<ProductWithPrices[]>([]);
+  const [recipeName, setRecipeName] = useState('');
   const [listName, setListName] = useState('');
 
   const handleGenerateRecipe = (recipe: RecipeResult) => {
@@ -53,15 +55,17 @@ export function Home() {
       toast.error('No ingredients to save');
       return;
     }
-    const name = listName.trim() || `Recipe ${new Date().toLocaleDateString()}`;
-    saveList({
+    const name = recipeName.trim() || `Recipe ${new Date().toLocaleDateString()}`;
+    saveRecipe({
       id: generateId(),
       name,
-      items: generatedRecipe.ingredients.map((i) => i.id),
+      recipeMarkdown: generatedRecipe.recipeMarkdown,
+      ingredients: generatedRecipe.ingredients,
+      totalPrice: generatedRecipe.totalPrice,
       createdAt: new Date(),
     });
     toast.success(`Saved "${name}"`);
-    setListName('');
+    setRecipeName('');
   };
 
   const handleSaveList = () => {
@@ -73,7 +77,17 @@ export function Home() {
     saveList({
       id: generateId(),
       name,
-      items: generatedList.map((p) => p.id),
+      items: generatedList.map((p) => {
+        const cheapestPrice = Math.min(...p.prices.map((pr) => pr.salePrice ?? pr.price));
+        const bestStore = p.prices.find((pr) => (pr.salePrice ?? pr.price) === cheapestPrice);
+        return {
+          id: p.id,
+          name: p.name,
+          unit: p.unit,
+          price: cheapestPrice,
+          store: bestStore?.storeName ?? 'Unknown',
+        };
+      }),
       createdAt: new Date(),
     });
     toast.success(`Saved "${name}"`);
@@ -91,7 +105,7 @@ export function Home() {
           <p className="text-lg font-black uppercase tracking-[0.2em] opacity-80 mb-8">
             Your friendly Bunny Buddy helping you find the best grocery deals!
           </p>
-          
+
           <div className="max-w-xl mx-auto h-[60px] relative overflow-hidden">
             <LogoLoop
               logos={storeLogos}
@@ -106,7 +120,6 @@ export function Home() {
               ariaLabel="Supermarket partners"
             />
           </div>
-          
         </div>
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent/30 rounded-full blur-3xl" />
       </div>
@@ -140,7 +153,6 @@ export function Home() {
       {/* Generated Recipe Display */}
       {generatedRecipe && (
         <Card className="p-8 bg-white border-4 border-primary rounded-[2rem] shadow-[12px_12px_0px_0px_#5D82C1]">
-          {/* Header */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
             <h3 className="text-3xl font-black text-primary flex items-center gap-2 italic">
               <ChefHat className="size-8" />
@@ -150,8 +162,8 @@ export function Home() {
               <Input
                 type="text"
                 placeholder="Name this recipe..."
-                value={listName}
-                onChange={(e) => setListName(e.target.value)}
+                  value={recipeName}
+                  onChange={(e) => setRecipeName(e.target.value)}
                 className="rounded-full border-4 border-primary font-bold h-12 bg-cream"
               />
               <Button
@@ -216,9 +228,7 @@ export function Home() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-black text-primary">
-                        ${ing.totalPrice.toFixed(2)}
-                      </p>
+                      <p className="font-black text-primary">${ing.totalPrice.toFixed(2)}</p>
                       <p className="text-[10px] text-foreground/40 font-bold">
                         ${ing.unitPrice.toFixed(2)} ea
                       </p>
@@ -227,7 +237,6 @@ export function Home() {
                 ))}
               </div>
 
-              {/* Total row */}
               <div className="flex items-center justify-between p-4 bg-primary/10 border-2 border-primary rounded-xl mt-4">
                 <span className="font-black text-primary uppercase text-sm tracking-widest">Total</span>
                 <span className="font-black text-primary text-2xl italic tracking-tighter">
@@ -268,44 +277,68 @@ export function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {generatedList.map((product: any) => {
-              // SAFE MAPPING LOGIC IMPLEMENTED HERE
-              let displayPrice = 0;
-              let displayStore = "Unknown Store";
+            {generatedList.map((product) => {
+              const cheapestPrice = Math.min(
+                ...product.prices.map((p) => p.salePrice ?? p.price)
+              );
+              const bestStore = product.prices.find(
+                (p) => (p.salePrice ?? p.price) === cheapestPrice
+              );
 
-              if (product.prices && Array.isArray(product.prices)) {
-                displayPrice = Math.min(
-                  ...product.prices.map((p: any) => p.salePrice || p.price)
-                );
-                const cheapestStore = product.prices.find(
-                  (p: any) => (p.salePrice || p.price) === displayPrice
-                );
-                displayStore = cheapestStore?.storeName || "Unknown Store";
-              } else {
-                displayPrice = product.price || 0;
-                displayStore = product.store || "Unknown Store";
-              }
-
-              return (
-                <Card key={product.id || Math.random()} className="p-5 bg-background border-4 border-primary/20 rounded-2xl hover:border-primary hover:shadow-[4px_4px_0px_0px_#5D82C1] transition-all group">
+              const CardContent = (
+                <Card
+                  key={product.id}
+                  className="p-5 bg-background border-4 border-primary/20 rounded-2xl hover:border-primary hover:shadow-[4px_4px_0px_0px_#5D82C1] transition-all group h-full"
+                >
+                  {/* Product image */}
+                  {bestStore?.image && (
+                    <div className="aspect-video bg-primary/5 rounded-xl border-2 border-primary/10 mb-4 overflow-hidden flex items-center justify-center p-3">
+                      <img
+                        src={bestStore.image}
+                        alt={product.name}
+                        className="object-contain max-h-full mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          (e.currentTarget.parentElement as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-black text-foreground text-lg leading-tight uppercase tracking-tighter">
                       {product.name}
                     </h4>
-                    <Sparkles className="size-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {bestStore?.url ? (
+                      <ExternalLink className="size-4 text-primary/30 group-hover:text-primary transition-colors flex-shrink-0" />
+                    ) : (
+                      <Sparkles className="size-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
                   </div>
-                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">{product.unit}</p>
-
-
+                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">
+                    {product.unit}
+                  </p>
                   <div className="mt-auto flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/30">
-                      {displayStore}
+                      {bestStore?.storeName ?? 'Unknown'}
                     </span>
                     <span className="font-black text-2xl text-primary tracking-tighter">
-                      ${Number(displayPrice).toFixed(2)}
+                      ${cheapestPrice.toFixed(2)}
                     </span>
                   </div>
                 </Card>
+              );
+
+              return bestStore?.url ? (
+                <a
+                  key={product.id}
+                  href={bestStore.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  {CardContent}
+                </a>
+              ) : (
+                <div key={product.id}>{CardContent}</div>
               );
             })}
           </div>
@@ -313,74 +346,4 @@ export function Home() {
       )}
     </div>
   );
-}
-
-// ─── Simple markdown renderer ─────────────────────────────────────────────────
-
-function RecipeMarkdown({ markdown }: { markdown: string }) {
-  const lines = markdown.split('\n');
-
-  return (
-    <div className="space-y-2 text-sm text-foreground">
-      {lines.map((line, i) => {
-        if (line.startsWith('# ')) {
-          return (
-            <h2 key={i} className="text-xl font-black text-primary uppercase tracking-tighter mt-2 mb-3">
-              {line.slice(2)}
-            </h2>
-          );
-        }
-        if (line.startsWith('## ')) {
-          return (
-            <h3 key={i} className="text-base font-black text-primary uppercase tracking-widest mt-4 mb-2">
-              {line.slice(3)}
-            </h3>
-          );
-        }
-        if (line.startsWith('### ')) {
-          return (
-            <h4 key={i} className="text-sm font-black text-primary/80 uppercase tracking-wider mt-3 mb-1">
-              {line.slice(4)}
-            </h4>
-          );
-        }
-        if (line.startsWith('- ') || line.startsWith('* ')) {
-          return (
-            <div key={i} className="flex gap-2 items-start">
-              <span className="text-primary font-black mt-0.5">•</span>
-              <span className="text-foreground/80 leading-relaxed">{renderInline(line.slice(2))}</span>
-            </div>
-          );
-        }
-        const numberedMatch = line.match(/^(\d+)\.\s(.+)/);
-        if (numberedMatch) {
-          return (
-            <div key={i} className="flex gap-3 items-start">
-              <span className="size-5 min-w-5 rounded-full bg-primary text-white text-[10px] flex items-center justify-center font-black mt-0.5">
-                {numberedMatch[1]}
-              </span>
-              <span className="text-foreground/80 leading-relaxed">{renderInline(numberedMatch[2])}</span>
-            </div>
-          );
-        }
-        if (line.trim() === '') return <div key={i} className="h-1" />;
-        return (
-          <p key={i} className="text-foreground/80 leading-relaxed">
-            {renderInline(line)}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
-function renderInline(text: string): React.ReactNode {
-  // Bold: **text**
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-black text-foreground">{part.slice(2, -2)}</strong>;
-    }
-    return part;
-  });
 }

@@ -2,6 +2,7 @@ import {
   buildProductFromHits,
   ensureUniqueProductIds,
   getElasticConfig,
+  groupHitsByProductName,
   parseElasticHits,
   parseJsonBody,
 } from "./_lib/elastic.js";
@@ -20,18 +21,7 @@ export default async function handler(req, res) {
 
     const results = await Promise.all(
       items.map(async (item) => {
-        const query = {
-          size: 25,
-          query: {
-            match: {
-              product_name: {
-                query: item,
-                fuzziness: "AUTO",
-              },
-            },
-          },
-          sort: [{ price: "asc" }],
-        };
+        const query = buildManualSearchQuery(item);
 
         const response = await fetch(searchUrl, {
           method: "POST",
@@ -50,10 +40,12 @@ export default async function handler(req, res) {
           throw new Error(`No matches found for "${item}".`);
         }
 
-        const bestMatchName = parsedHits[0].productName;
-        const matchingHits = parsedHits.filter(
-          (hit) => hit.productName === bestMatchName
-        );
+        const grouped = groupHitsByProductName(parsedHits);
+        const bestMatchName = selectBestProductName(item, grouped);
+        const matchingHits = grouped.get(bestMatchName);
+        if (!matchingHits || matchingHits.length === 0) {
+          throw new Error(`No matches found for "${item}".`);
+        }
 
         return buildProductFromHits(bestMatchName, matchingHits);
       })
@@ -81,4 +73,101 @@ function requireItemsArray(items) {
     }
     return item.trim();
   });
+}
+
+function buildManualSearchQuery(query) {
+  const size = 50;
+  const matchProductName = {
+    query,
+    operator: "and",
+    boost: 2,
+  };
+
+  if (query.length >= 5) {
+    matchProductName.fuzziness = "AUTO";
+  }
+
+  return {
+    size,
+    query: {
+      bool: {
+        should: [
+          { match_phrase: { product_name: { query, boost: 5 } } },
+          { match: { product_name: matchProductName } },
+          { match: { category: { query, operator: "and", boost: 1 } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+    sort: [{ _score: "desc" }, { price: "asc" }],
+  };
+}
+
+function selectBestProductName(query, grouped) {
+  let bestName;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  let bestPrice = Number.POSITIVE_INFINITY;
+  const normalisedQuery = normaliseString(query);
+
+  for (const [name, hits] of grouped) {
+    if (!Array.isArray(hits) || hits.length === 0) {
+      throw new Error(`No hits found for "${name}".`);
+    }
+    const score = scoreProductCandidate(
+      normalisedQuery,
+      normaliseString(name),
+      normaliseString(hits[0].category)
+    );
+    const minPrice = minFinalPrice(hits);
+    if (score > bestScore || (score === bestScore && minPrice < bestPrice)) {
+      bestName = name;
+      bestScore = score;
+      bestPrice = minPrice;
+    }
+  }
+
+  if (!bestName) {
+    throw new Error(`No matches found for "${query}".`);
+  }
+
+  return bestName;
+}
+
+function scoreProductCandidate(normalisedQuery, normalisedName, normalisedCategory) {
+  const tokens = normalisedQuery.split(/\s+/).filter(Boolean);
+  let score = 0;
+
+  if (normalisedName === normalisedQuery) score += 120;
+  if (normalisedName.startsWith(normalisedQuery)) score += 80;
+  if (normalisedName.includes(normalisedQuery)) score += 50;
+
+  const nameTokenMatches = tokens.filter((token) => normalisedName.includes(token)).length;
+  score += nameTokenMatches * 15;
+
+  if (normalisedCategory.includes(normalisedQuery)) score += 25;
+  const categoryTokenMatches = tokens.filter((token) =>
+    normalisedCategory.includes(token)
+  ).length;
+  score += categoryTokenMatches * 10;
+
+  score -= Math.min(30, Math.floor(normalisedName.length / 5));
+  return score;
+}
+
+function normaliseString(value) {
+  if (typeof value !== "string") {
+    throw new Error("Expected a string.");
+  }
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function minFinalPrice(hits) {
+  return hits.reduce((min, hit) => {
+    const finalPrice = hit.salePrice ?? hit.price;
+    return finalPrice < min ? finalPrice : min;
+  }, Number.POSITIVE_INFINITY);
 }

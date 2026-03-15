@@ -1,0 +1,14 @@
+{
+  "installCommand": "yarn --cwd frontend install",
+  "buildCommand": "yarn --cwd frontend build",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "frontend/api/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/frontend/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

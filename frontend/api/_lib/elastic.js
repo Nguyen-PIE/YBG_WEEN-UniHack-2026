@@ -11,9 +11,11 @@ const INDEX_NAME = "shopping-data";
 const REQUIRED_STRING_FIELDS = {
   productName: ["product_name", "productName", "name"],
   category: ["category"],
-  unit: ["unit", "unit_name", "unit_size", "package_size", "size"],
   storeName: ["store_name", "storeName"],
 };
+
+// Checked in order; if none found we fall back to extractUnitFromProductName()
+const OPTIONAL_UNIT_FIELDS = ["unit", "unit_name", "unit_size", "package_size", "size"];
 
 const OPTIONAL_ID_FIELDS = {
   productId: ["product_id", "productId", "id"],
@@ -84,9 +86,7 @@ export function buildProductFromHits(productName, hits) {
     if (hit.category !== category) {
       throw new Error(`Category mismatch for "${productName}".`);
     }
-    if (hit.unit !== unit) {
-      throw new Error(`Unit mismatch for "${productName}".`);
-    }
+    // unit is best-effort – skip mismatch check since it may be derived differently per store
   }
 
   const pricesByStore = new Map();
@@ -101,6 +101,8 @@ export function buildProductFromHits(productName, hits) {
         onSale: hit.onSale,
         salePrice: hit.salePrice,
         weeklySpecial: hit.weeklySpecial,
+        image: hit.image,
+        url: hit.url,
         finalPrice,
       });
     }
@@ -159,21 +161,23 @@ function parseHit(hit) {
 
   const productName = getRequiredString(source, REQUIRED_STRING_FIELDS.productName, "product_name");
   const category = getRequiredString(source, REQUIRED_STRING_FIELDS.category, "category");
-  const unit = getRequiredString(source, REQUIRED_STRING_FIELDS.unit, "unit");
   const storeName = getRequiredString(source, REQUIRED_STRING_FIELDS.storeName, "store_name");
   const price = getRequiredNumber(source, ["price"], "price");
+  // unit is stored inconsistently – try explicit fields first, then extract from product name
+  const unit = getOptionalStringFromFields(source, OPTIONAL_UNIT_FIELDS) ?? extractUnitFromProductName(productName);
+
   const productId = getOptionalId(source, OPTIONAL_ID_FIELDS.productId, "product_id");
   const storeId = getOptionalId(source, OPTIONAL_ID_FIELDS.storeId, "store_id") ?? slugify(storeName);
   const onSale = getOptionalBoolean(source, OPTIONAL_BOOLEAN_FIELDS.onSale, "on_sale") ?? false;
   const weeklySpecial = getOptionalBoolean(source, OPTIONAL_BOOLEAN_FIELDS.weeklySpecial, "weekly_special");
   const salePrice = getOptionalNumber(source, OPTIONAL_NUMBER_FIELDS.salePrice, "sale_price");
 
-  if (onSale && salePrice === undefined) {
-    throw new Error(`sale_price is required when on_sale is true for "${productName}".`);
-  }
-
-  const resolvedOnSale = salePrice !== undefined ? true : onSale;
+  // Treat on_sale as false when the sale_price is missing — avoids hard failures on incomplete data
+  const resolvedOnSale = salePrice !== undefined ? true : false;
   const resolvedSalePrice = salePrice;
+
+  const image = typeof source.image === "string" && source.image.trim() !== "" ? source.image.trim() : undefined;
+  const url = typeof source.url === "string" && source.url.trim() !== "" ? source.url.trim() : undefined;
 
   return {
     productName,
@@ -186,6 +190,8 @@ function parseHit(hit) {
     onSale: resolvedOnSale,
     salePrice: resolvedSalePrice,
     weeklySpecial,
+    image,
+    url,
   };
 }
 
@@ -293,6 +299,39 @@ function slugify(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Like getRequiredString but returns undefined instead of throwing.
+ */
+function getOptionalStringFromFields(source, fields) {
+  for (const field of fields) {
+    const value = source[field];
+    if (typeof value === "string" && value.trim() !== "") {
+      return value.trim();
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Extracts a unit/size string from a product name.
+ * Handles formats like:
+ *   "Coles Creamy Pumpkin Soup | 500g"  →  "500g"
+ *   "Woolworths Full Cream Milk 2L"     →  "2L"
+ */
+function extractUnitFromProductName(productName) {
+  // "Product Name | Size" pattern (most common in Coles/Woolworths data)
+  const pipeMatch = productName.match(/\|\s*(.+)$/);
+  if (pipeMatch) return pipeMatch[1].trim();
+
+  // Trailing size pattern: 500g, 1.5kg, 2L, 250ml, 6pk, 12ct, etc.
+  const sizeMatch = productName.match(
+    /\b(\d+(?:\.\d+)?\s*(?:g|kg|L|ml|mL|oz|lb|pk|pack|ct|pieces?|serves?))\b/i
+  );
+  if (sizeMatch) return sizeMatch[0].trim();
+
+  return "";
 }
 
 function removeUndefined(obj) {
