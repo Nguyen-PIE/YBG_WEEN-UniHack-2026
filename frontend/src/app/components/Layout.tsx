@@ -64,7 +64,7 @@ export function Layout() {
 
       {/* Optional: Subtle footer for extra "Bunny" vibes */}
       <footer className="py-10 text-center opacity-20 select-none pointer-events-none">
-        <p className="text-primary font-black uppercase tracking-[1em]">UniHack Submission :P</p>
+        <p className="text-primary font-black uppercase tracking-[1em]">BudgetBunny</p>
       </footer>
     </div>
   );
